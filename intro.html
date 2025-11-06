@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Website - Introduction</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        secondary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-in-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .bg-gradient-light {
+                background: linear-gradient(135deg, #e0f2fe 0%, #eef2ff 100%);
+            }
+            .bg-gradient-dark {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            }
+            .highlight-step {
+                border: 2px solid #6366f1;
+                box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-black text-white transition-colors duration-300" id="body-element">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-900 shadow-md transition-colors duration-300">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b5e1e873f23741a8b35ca632a3ca932f~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015245&x-signature=RKJB2ttdvlu0bEeRta72gb9uI9Q%3D" alt="Calendar Logo" class="h-10 w-10">
+                    <span class="text-xl font-bold text-primary-600 dark:text-primary-400">CalendarPro</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+                    <a href="intro.html" class="text-primary-600 dark:text-primary-400 font-medium hover:text-primary-800 dark:hover:text-primary-300 transition-colors">Introduction</a>
+                    <a href="calendar.html" class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Calendar</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fa fa-moon-o dark:hidden text-gray-600" aria-hidden="true"></i>
+                        <i class="fa fa-sun-o hidden dark:block text-yellow-300" aria-hidden="true"></i>
+                    </button>
+                    <button class="md:hidden" id="mobile-menu-button">
+                        <i class="fa fa-bars text-gray-600 dark:text-gray-300" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden hidden pt-4 pb-2 animate-fade-in">
+                <a href="index.html" class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+                <a href="intro.html" class="block py-2 text-primary-600 dark:text-primary-400 font-medium">Introduction</a>
+                <a href="calendar.html" class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Calendar</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-light dark:bg-gradient-dark py-16 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4 text-shadow">How to Use CalendarPro</h1>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    A comprehensive guide to help you make the most of our calendar system
+                </p>
+            </div>
+            <div class="flex justify-center">
+                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/18ed024fdee648c68665b605b8feb629~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015244&x-signature=FbaZ8HhFIFW5putcBvW3ZZdWebo%3D" alt="Calendar Preview" class="w-full max-w-2xl rounded-xl shadow-xl">
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started Section -->
+    <section class="py-16 bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-12">Getting Started</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
+                <div class="order-2 md:order-1">
+                    <h3 class="text-2xl font-semibold text-gray-800 dark:text-white mb-4">Accessing the Calendar</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        To access the calendar, simply click on the "Calendar" link in the navigation menu at the top of any page. This will take you to the main calendar view where you can see your monthly schedule and manage your tasks.
+                    </p>
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <p class="text-gray-700 dark:text-gray-300">
+                            <i class="fa fa-info-circle text-primary-600 dark:text-primary-400 mr-2" aria-hidden="true"></i>
+                            You can also navigate directly to the calendar page by visiting <code class="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">calendar.html</code>
+                        </p>
+                    </div>
+                </div>
+                <div class="order-1 md:order-2 flex justify-center">
+                    <div class="relative w-full max-w-md">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b5e1e873f23741a8b35ca632a3ca932f~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015245&x-signature=RKJB2ttdvlu0bEeRta72gb9uI9Q%3D" alt="Calendar Logo" class="h-8 w-8">
+                                    <span class="text-lg font-bold text-primary-600 dark:text-primary-400">CalendarPro</span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+                                    <a href="#" class="text-primary-600 dark:text-primary-400 font-medium">Introduction</a>
+                                    <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Calendar</a>
+                                </div>
+                            </div>
+                            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mt-8 mb-4 highlight-step">
+                                <i class="fa fa-calendar text-primary-600 dark:text-primary-400 text-xl" aria-hidden="true"></i>
+                            </div>
+                            <p class="text-center text-gray-700 dark:text-gray-300 font-medium">Click Here to Access Calendar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
+                <div class="flex justify-center">
+                    <div class="relative w-full max-w-md">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b5e1e873f23741a8b35ca632a3ca932f~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015245&x-signature=RKJB2ttdvlu0bEeRta72gb9uI9Q%3D" alt="Calendar Logo" class="h-8 w-8">
+                                    <span class="text-lg font-bold text-primary-600 dark:text-primary-400">CalendarPro</span>
+                                </div>
+                                <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors highlight-step">
+                                    <i class="fa fa-moon-o dark:hidden text-gray-600" aria-hidden="true"></i>
+                                    <i class="fa fa-sun-o hidden dark:block text-yellow-300" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div class="mt-8 mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Current Theme</span>
+                                    <span class="text-sm font-medium text-primary-600 dark:text-primary-400" id="current-theme-display">Light Mode</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary-600 dark:bg-primary-400 w-1/2" id="theme-indicator"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-800 dark:text-white mb-4">Switching Between Dark and Light Mode</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        CalendarPro supports both dark and light modes to suit your preferences and reduce eye strain. To switch between modes, click on the moon/sun icon in the top right corner of any page.
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                        <li>Click the moon icon to switch to dark mode</li>
+                        <li>Click the sun icon to switch back to light mode</li>
+                        <li>Your preference will be saved for future visits</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calendar Features Section -->
+    <section class="py-16 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-12">Calendar Features</h2>
+            
+            <!-- Monthly Calendar View -->
+            <div class="mb-20">
+                <h3 class="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-8">Monthly Calendar View</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">
+                            The monthly calendar view displays the current month with all your scheduled tasks and deadlines. The current day is highlighted for easy reference.
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300 mb-6">
+                            <li>Navigate between months using the previous/next buttons</li>
+                            <li>Click on a date to view or add tasks for that specific day</li>
+                            <li>Tasks and deadlines are color-coded for easy identification</li>
+                            <li>Hover over a task to see a brief preview of its details</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-4">
+                            <button class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                                <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                            </button>
+                            <h4 class="text-lg font-semibold text-gray-800 dark:text-white">November 2025</h4>
+                            <button class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 mb-2">
+                            <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Sun</div>
+                            <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Mon</div>
+                            <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Tue</div>
+                            <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Wed</div>
+                            <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Thu</div>
+                            <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Fri</div>
+                            <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Sat</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1">
+                            <!-- Previous month's days -->
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">3</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">4</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">5</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">6</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">7</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">8</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">9</div>
+                            
+                            <!-- Current month's days -->
+                            <div class="h-12 flex items-center justify-center text-sm">10</div>
+                            <div class="h-12 flex items-center justify-center text-sm">11</div>
+                            <div class="h-12 flex items-center justify-center text-sm">12</div>
+                            <div class="h-12 flex items-center justify-center text-sm">13</div>
+                            <div class="h-12 flex items-center justify-center text-sm">14</div>
+                            <div class="h-12 flex items-center justify-center text-sm">15</div>
+                            <div class="h-12 flex items-center justify-center text-sm">16</div>
+                            <div class="h-12 flex items-center justify-center text-sm">17</div>
+                            <div class="h-12 flex items-center justify-center text-sm">18</div>
+                            <div class="h-12 flex items-center justify-center text-sm">19</div>
+                            <div class="h-12 flex items-center justify-center text-sm">20</div>
+                            <div class="h-12 flex items-center justify-center text-sm">21</div>
+                            <div class="h-12 flex items-center justify-center text-sm">22</div>
+                            <div class="h-12 flex items-center justify-center text-sm bg-primary-100 dark:bg-primary-900 rounded-full font-medium text-primary-600 dark:text-primary-400">23</div>
+                            <div class="h-12 flex items-center justify-center text-sm">24</div>
+                            <div class="h-12 flex items-center justify-center text-sm">25</div>
+                            <div class="h-12 flex items-center justify-center text-sm">26</div>
+                            <div class="h-12 flex items-center justify-center text-sm">27</div>
+                            <div class="h-12 flex items-center justify-center text-sm">28</div>
+                            <div class="h-12 flex items-center justify-center text-sm">29</div>
+                            <div class="h-12 flex items-center justify-center text-sm">30</div>
+                            
+                            <!-- Next month's days -->
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">1</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">2</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">3</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">4</div>
+                            <div class="h-12 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">5</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Adding Tasks -->
+            <div class="mb-20">
+                <h3 class="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-8">Adding Tasks</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 md:order-1">
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">
+                            To add a new task, click on the "Add Task" button below the monthly calendar. Fill in the required details such as task name, start time, end time, location, and description.
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300 mb-6">
+                            <li>Select the task type (Lecture, Tutorial, Training, etc.)</li>
+                            <li>Set the start and end times for the task</li>
+                            <li>Add a location if the task is in-person</li>
+                            <li>Include additional details in the description field</li>
+                            <li>Add a link to relevant resources if needed</li>
+                        </ul>
+                    </div>
+                    <div class="order-1 md:order-2 bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                        <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Add New Task</h4>
+                        <form>
+                            <div class="mb-4">
+                                <label for="task-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Name</label>
+                                <input type="text" id="task-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Type</label>
+                                    <select id="task-type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                        <option>Lecture</option>
+                                        <option>Tutorial</option>
+                                        <option>Training</option>
+                                        <option>Meeting</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="task-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                                    <input type="date" id="task-date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="start-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
+                                    <input type="time" id="start-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                </div>
+                                <div>
+                                    <label for="end-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
+                                    <input type="time" id="end-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                                <input type="text" id="location" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            </div>
+                            <div class="mb-4">
+                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                                <textarea id="description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label for="link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
+                                <input type="url" id="link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="button" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                                <button type="button" class="bg-primary-600 text-white font-medium py-2 px-4 rounded-md hover:bg-primary-700 transition-colors">Add Task</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Adding Deadlines -->
+            <div class="mb-20">
+                <h3 class="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-8">Adding Deadlines</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="flex justify-center">
+                        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Add New Deadline</h4>
+                            <form>
+                                <div class="mb-4">
+                                    <label for="deadline-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline Name</label>
+                                    <input type="text" id="deadline-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="deadline-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                                        <input type="date" id="deadline-date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label for="deadline-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+                                        <input type="time" id="deadline-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="deadline-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                                    <textarea id="deadline-description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="deadline-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
+                                    <input type="url" id="deadline-link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="button" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                                    <button type="button" class="bg-primary-600 text-white font-medium py-2 px-4 rounded-md hover:bg-primary-700 transition-colors">Add Deadline</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">
+                            To add a new deadline, click on the "Add Deadline" button below the monthly calendar. Fill in the required details such as deadline name, due date, and description.
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300 mb-6">
+                            <li>Set the due date and time for the deadline</li>
+                            <li>Add a description to provide more context</li>
+                            <li>Include a link to relevant resources if needed</li>
+                            <li>Deadlines will be highlighted on the calendar</li>
+                            <li>Upcoming deadlines will be shown in the today's summary</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Daily Schedule View -->
+            <div class="mb-20">
+                <h3 class="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-8">Daily Schedule View</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 md:order-1">
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">
+                            The daily schedule view displays your tasks for the selected day in a timeline format, with each hour represented. This allows you to see your day at a glance and easily manage your time.
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300 mb-6">
+                            <li>Tasks are displayed in chronological order</li>
+                            <li>Each task shows the time, title, and type</li>
+                            <li>Click on a task to view or edit its details</li>
+                            <li>Drag and drop tasks to adjust their time</li>
+                            <li>Scroll through the timeline to see the entire day</li>
+                        </ul>
+                    </div>
+                    <div class="order-1 md:order-2 bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                        <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Today's Schedule</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">6:00 AM</div>
+                                <div class="flex-1 h-10 bg-gray-100 dark:bg-gray-800 rounded"></div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">7:00 AM</div>
+                                <div class="flex-1 h-10 bg-gray-100 dark:bg-gray-800 rounded"></div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">8:00 AM</div>
+                                <div class="flex-1 h-10 bg-gray-100 dark:bg-gray-800 rounded"></div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">9:00 AM</div>
+                                <div class="flex-1 h-10 bg-blue-100 dark:bg-blue-900 rounded p-1 border border-blue-200 dark:border-blue-800">
+                                    <div class="bg-blue-500 dark:bg-blue-600 text-white text-xs p-1 rounded truncate">Lecture: Introduction to Computer Science</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">10:00 AM</div>
+                                <div class="flex-1 h-10 bg-blue-100 dark:bg-blue-900 rounded p-1 border border-blue-200 dark:border-blue-800">
+                                    <div class="bg-blue-500 dark:bg-blue-600 text-white text-xs p-1 rounded truncate">Lecture: Introduction to Computer Science</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">11:00 AM</div>
+                                <div class="flex-1 h-10 bg-gray-100 dark:bg-gray-800 rounded"></div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">12:00 PM</div>
+                                <div class="flex-1 h-10 bg-green-100 dark:bg-green-900 rounded p-1 border border-green-200 dark:border-green-800">
+                                    <div class="bg-green-500 dark:bg-green-600 text-white text-xs p-1 rounded truncate">Tutorial: Programming Basics</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">1:00 PM</div>
+                                <div class="flex-1 h-10 bg-green-100 dark:bg-green-900 rounded p-1 border border-green-200 dark:border-green-800">
+                                    <div class="bg-green-500 dark:bg-green-600 text-white text-xs p-1 rounded truncate">Tutorial: Programming Basics</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">2:00 PM</div>
+                                <div class="flex-1 h-10 bg-gray-100 dark:bg-gray-800 rounded"></div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 text-sm text-gray-500 dark:text-gray-400">3:00 PM</div>
+                                <div class="flex-1 h-10 bg-purple-100 dark:bg-purple-900 rounded p-1 border border-purple-200 dark:border-purple-800">
+                                    <div class="bg-purple-500 dark:bg-purple-600 text-white text-xs p-1 rounded truncate">Meeting: Project Discussion</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Today's Summary -->
+            <div>
+                <h3 class="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-8">Today's Summary</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="flex justify-center">
+                        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Today's Tasks & Deadlines</h4>
+                            <div class="mb-6">
+                                <h5 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Tasks</h5>
+                                <div class="space-y-2">
+                                    <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-md border border-blue-100 dark:border-blue-800">
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-medium text-blue-700 dark:text-blue-300">Lecture: Introduction to Computer Science</span>
+                                            <span class="text-sm text-blue-600 dark:text-blue-400">9:00 - 11:00 AM</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Location: Main Hall, Building A</p>
+                                    </div>
+                                    <div class="bg-green-50 dark:bg-green-900/30 p-3 rounded-md border border-green-100 dark:border-green-800">
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-medium text-green-700 dark:text-green-300">Tutorial: Programming Basics</span>
+                                            <span class="text-sm text-green-600 dark:text-green-400">12:00 - 2:00 PM</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Location: Computer Lab, Building B</p>
+                                    </div>
+                                    <div class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-md border border-purple-100 dark:border-purple-800">
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-medium text-purple-700 dark:text-purple-300">Meeting: Project Discussion</span>
+                                            <span class="text-sm text-purple-600 dark:text-purple-400">3:00 - 4:00 PM</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Location: Conference Room, Building C</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Deadlines</h5>
+                                <div class="space-y-2">
+                                    <div class="bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800">
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-medium text-red-700 dark:text-red-300">Assignment: Data Structures</span>
+                                            <span class="text-sm text-red-600 dark:text-red-400">Due: 11:59 PM</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Submit via the online portal</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">
+                            The today's summary section displays all tasks and deadlines for the selected day. This gives you a quick overview of what you need to accomplish for the day.
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300 mb-6">
+                            <li>Tasks are grouped by type and color-coded</li>
+                            <li>Each task shows the title, time, and location</li>
+                            <li>Deadlines are displayed separately with due times</li>
+                            <li>Upcoming deadlines are highlighted</li>
+                            <li>Click on any task or deadline to view or edit details</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Task Types Section -->
+    <section class="py-16 bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-12">Task Types</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Task Type 1 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-3">
+                            <i class="fa fa-book text-blue-600 dark:text-blue-400" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Lecture</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Formal educational sessions where information is presented to a group of students.
+                    </p>
+                </div>
+                <!-- Task Type 2 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-3">
+                            <i class="fa fa-users text-green-600 dark:text-green-400" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Tutorial</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Small group sessions focused on discussion, problem-solving, and hands-on learning.
+                    </p>
+                </div>
+                <!-- Task Type 3 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mr-3">
+                            <i class="fa fa-graduation-cap text-yellow-600 dark:text-yellow-400" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Training</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Structured learning activities to develop specific skills or knowledge.
+                    </p>
+                </div>
+                <!-- Task Type 4 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-3">
+                            <i class="fa fa-handshake-o text-purple-600 dark:text-purple-400" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Meeting</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Gatherings for discussion, decision-making, or information sharing with colleagues.
+                    </p>
+                </div>
+                <!-- Task Type 5 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mr-3">
+                            <i class="fa fa-tasks text-red-600 dark:text-red-400" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Assignment</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Academic tasks or projects that need to be completed by a specific deadline.
+                    </p>
+                </div>
+                <!-- Task Type 6 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mr-3">
+                            <i class="fa fa-calendar-check-o text-pink-600 dark:text-pink-400" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Exam</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Formal assessments to evaluate knowledge or skills in a particular subject.
+                    </p>
+                </div>
+                <!-- Task Type 7 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mr-3">
+                            <i class="fa fa-coffee text-indigo-600 dark:text-indigo-400" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Break</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Scheduled time for rest, relaxation, or personal activities.
+                    </p>
+                </div>
+                <!-- Task Type 8 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mr-3">
+                            <i class="fa fa-ellipsis-h text-gray-600 dark:text-gray-400" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Other</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Any other type of task that doesn't fit into the above categories.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-16 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-12">Frequently Asked Questions</h2>
+            <div class="max-w-3xl mx-auto space-y-6">
+                <!-- FAQ Item 1 -->
+                <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">How do I edit a task or deadline?</h3>
+                        <i class="fa fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" aria-hidden="true"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="text-gray-600 dark:text-gray-300">
+                            To edit a task or deadline, simply click on it in either the monthly calendar view, daily schedule view, or today's summary. This will open an edit form where you can modify the details. Make your changes and click "Save" to update the task or deadline.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 2 -->
+                <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Can I delete a task or deadline?</h3>
+                        <i class="fa fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" aria-hidden="true"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="text-gray-600 dark:text-gray-300">
+                            Yes, you can delete any task or deadline. To do so, click on the task or deadline to open the edit form, then click the "Delete" button. You will be asked to confirm the deletion before it is permanently removed.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 3 -->
+                <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Will my data be saved if I close the browser?</h3>
+                        <i class="fa fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" aria-hidden="true"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="text-gray-600 dark:text-gray-300">
+                            Yes, your data is saved locally in your browser's storage. This means your tasks and deadlines will persist even if you close the browser or turn off your computer. However, please note that if you clear your browser's data or use a different browser/device, your calendar data will not be available.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 4 -->
+                <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">How do I change the color of a task type?</h3>
+                        <i class="fa fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" aria-hidden="true"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="text-gray-600 dark:text-gray-300">
+                            Currently, the colors for each task type are fixed and cannot be customized. However, this is a feature we are considering for future updates. Each task type has a distinct color to help you easily identify and categorize your tasks at a glance.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 5 -->
+                <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Can I set reminders for tasks or deadlines?</h3>
+                        <i class="fa fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" aria-hidden="true"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="text-gray-600 dark:text-gray-300">
+                            At this time, CalendarPro does not have a built-in reminder system. However, you can use the today's summary section to view all your tasks and deadlines for the current day. We are planning to add reminder functionality in a future update.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-primary-600 dark:bg-primary-800 transition-colors duration-300">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold text-white mb-6">Ready to Start Using CalendarPro?</h2>
+            <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
+                Now that you know how to use all the features, it's time to start organizing your schedule!
+            </p>
+            <a href="calendar.html" class="bg-white text-primary-600 hover:bg-primary-50 font-medium py-3 px-8 rounded-lg transition-colors inline-flex items-center">
+                <i class="fa fa-calendar-plus-o mr-2" aria-hidden="true"></i>Go to Calendar
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12 border-t border-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="bg-white text-black p-1 rounded">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                        </div>
+                        <span class="text-lg font-light">Calendar<span class="text-accent-500">Pro</span></span>
+                    </div>
+                    <p class="text-gray-500 max-w-xs">
+                        一个现代、直观的日历系统，帮助您高效管理任务、截止日期和日程安排。
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">快速链接</h3>
+                        <ul class="space-y-2">
+                            <li><a href="index.html" class="text-gray-400 hover:text-white transition-colors">首页</a></li>
+                            <li><a href="intro.html" class="text-gray-400 hover:text-white transition-colors">介绍</a></li>
+                            <li><a href="calendar.html" class="text-gray-400 hover:text-white transition-colors">日历</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">功能</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">任务管理</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">截止日期跟踪</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">每日时间表</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">联系我们</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-center">
+                                <i class="fa fa-envelope-o mr-2 text-accent-500" aria-hidden="true"></i>
+                                <a href="mailto:info@calendarpro.com" class="text-gray-400 hover:text-white transition-colors">info@calendarpro.com</a>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fa fa-phone mr-2 text-accent-500" aria-hidden="true"></i>
+                                <span class="text-gray-400">+1 (555) 123-4567</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 mb-4 md:mb-0">© 2025 CalendarPro. 保留所有权利。</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fa fa-facebook" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fa fa-twitter" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fa fa-instagram" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const bodyElement = document.getElementById('body-element');
+        const currentThemeDisplay = document.getElementById('current-theme-display');
+        const themeIndicator = document.getElementById('theme-indicator');
+        
+        // Check for saved theme preference or use system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            bodyElement.classList.add('dark');
+            currentThemeDisplay.textContent = 'Dark Mode';
+            themeIndicator.style.width = '100%';
+        } else {
+            bodyElement.classList.remove('dark');
+            currentThemeDisplay.textContent = 'Light Mode';
+            themeIndicator.style.width = '50%';
+        }
+        
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            bodyElement.classList.toggle('dark');
+            
+            // Update theme display
+            if (bodyElement.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+                currentThemeDisplay.textContent = 'Dark Mode';
+                themeIndicator.style.width = '100%';
+            } else {
+                localStorage.theme = 'light';
+                currentThemeDisplay.textContent = 'Light Mode';
+                themeIndicator.style.width = '50%';
+            }
+        });
+        
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // FAQ Toggle
+        const faqToggles = document.querySelectorAll('.faq-toggle');
+        
+        faqToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const content = toggle.nextElementSibling;
+                const icon = toggle.querySelector('i');
+                
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+        
+        // Animation on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

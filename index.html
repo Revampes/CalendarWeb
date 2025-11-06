@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Website - Home</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-in-out',
+                        'typing': 'typing 2s steps(20, end), blink 1s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        typing: {
+                            'from': { width: '0' },
+                            'to': { width: '100%' }
+                        },
+                        blink: {
+                            'from, to': { borderColor: 'transparent' },
+                            '50%': { borderColor: 'currentColor' }
+                        }
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .bg-black-gradient {
+                background: linear-gradient(135deg, #000000 0%, #121212 100%);
+            }
+            .typing-cursor {
+                border-right: 2px solid currentColor;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            .mouse-follower {
+                position: fixed;
+                pointer-events: none;
+                z-index: 9999;
+                mix-blend-mode: difference;
+                opacity: 0.7;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen-screen-screen-body bg-black text-white transition-colors duration-300" id="body-element">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-900 shadow-md transition-colors duration-300">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b5e1e873f23741a8b35ca632a3ca932f~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015245&x-signature=RKJB2ttdvlu0bEeRta72gb9uI9Q%3D" alt="Calendar Logo" class="h-10 w-10">
+                    <span class="text-xl font-bold text-primary-600 dark:text-primary-400">CalendarPro</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-primary-600 dark:text-primary-400 font-medium hover:text-primary-800 dark:hover:text-primary-300 transition-colors">Home</a>
+                    <a href="intro.html" class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Introduction</a>
+                    <a href="calendar.html" class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Calendar</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fa fa-moon-o dark:hidden text-gray-600" aria-hidden="true"></i>
+                        <i class="fa fa-sun-o hidden dark:block text-yellow-300" aria-hidden="true"></i>
+                    </button>
+                    <button class="md:hidden" id="mobile-menu-button">
+                        <i class="fa fa-bars text-gray-600 dark:text-gray-300" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden hidden pt-4 pb-2 animate-fade-in">
+                <a href="index.html" class="block py-2 text-primary-600 dark:text-primary-400 font-medium">Home</a>
+                <a href="intro.html" class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Introduction</a>
+                <a href="calendar.html" class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Calendar</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-black-gradient min-h-[80vh] flex items-center justify-center transition-colors duration-300 relative overflow-hidden">
+        <!-- Mouse Follower Container -->
+        <div id="mouse-follow-container" class="fixed inset-0 pointer-events-none z-0"></div>
+        
+        <div class="container mx-auto px-4 py-16 relative z-10">
+            <div class="flex flex-col items-center text-center">
+                <h1 class="text-4xl md:text-6xl font-light mb-4 animate-fade-in">
+                    Simple<span class="text-accent-500">Calendar</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl animate-slide-up">
+                    I am a
+                    <span id="typing-text" class="typing-cursor inline-block w-0 text-white"></span>
+                </p>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 animate-slide-up" style="animation-delay: 0.3s;">
+                    <a href="calendar.html" class="bg-white text-black hover:bg-gray-200 font-light py-3 px-8 rounded-none transition-colors text-center">
+                        Use Now
+                    </a>
+                    <a href="intro.html" class="bg-transparent border border-white text-white hover:bg-white hover:text-black font-light py-3 px-8 rounded-none transition-colors text-center">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-black transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl font-light text-center mb-16 tracking-wider">Core Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="group relative overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                        <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
+                            <i class="fa fa-calendar text-6xl text-accent-500" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-light mb-2">Interactive Calendar</h3>
+                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Intuitive monthly calendar view to easily manage your schedule and seamlessly navigate between different months and years.
+                    </p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="group relative overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                        <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
+                            <i class="fa fa-tasks text-6xl text-accent-500" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-light mb-2">Task Management</h3>
+                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Create, edit, and track tasks with detailed information including start time, end time, location, and description.
+                    </p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="group relative overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                        <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
+                            <i class="fa fa-clock-o text-6xl text-accent-500" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-light mb-2">Deadline Tracking</h3>
+                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Never miss important deadlines again. Set reminders for upcoming deadlines and stay on top of your commitments.
+                    </p>
+                </div>
+                <!-- Feature 4 -->
+                <div class="group relative overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                        <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
+                            <i class="fa fa-calendar-check-o text-6xl text-accent-500" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-light mb-2">Daily Schedule</h3>
+                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        View your day at a glance with hourly timeline view. Plan efficiently and stay on track throughout the day.
+                    </p>
+                </div>
+                <!-- Feature 5 -->
+                <div class="group relative overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                        <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
+                            <i class="fa fa-moon-o text-6xl text-accent-500" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-light mb-2">Minimalist Design</h3>
+                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Clean minimalist design reduces visual distractions, allowing you to focus on your content and tasks.
+                    </p>
+                </div>
+                <!-- Feature 6 -->
+                <div class="group relative overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                        <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
+                            <i class="fa fa-mobile text-6xl text-accent-500" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-light mb-2">Responsive Design</h3>
+                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Access your calendar from any device with fully responsive design that adapts to all screen sizes.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-gray-900 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl font-light text-center mb-16 tracking-wider">User Reviews</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="border-b border-gray-800 pb-6">
+                    <p class="text-gray-400 mb-6 italic">
+                        "CalendarPro has completely transformed how I manage my schedule. The intuitive interface and powerful features keep me organized and in control of all my tasks."
+                    </p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center mr-3">
+                            <span class="font-medium">JD</span>
+                        </div>
+                        <div>
+                            <h4 class="font-light">Jane Doe</h4>
+                            <p class="text-xs text-gray-500">Student</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="border-b border-gray-800 pb-6">
+                    <p class="text-gray-400 mb-6 italic">
+                        "The daily schedule view is incredibly useful for planning my workday. I love how easy it is to add and edit tasks, and the minimalist design is perfect for extended use."
+                    </p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center mr-3">
+                            <span class="font-medium">MS</span>
+                        </div>
+                        <div>
+                            <h4 class="font-light">Michael Smith</h4>
+                            <p class="text-xs text-gray-500">Professional</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="border-b border-gray-800 pb-6">
+                    <p class="text-gray-400 mb-6 italic">
+                        "As a teacher, I use CalendarPro to track my classes, tutorials, and office hours. The deadline tracking feature helps me stay on top of grading and preparation."
+                    </p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center mr-3">
+                            <span class="font-medium">AL</span>
+                        </div>
+                        <div>
+                            <h4 class="font-light">Amanda Lee</h4>
+                            <p class="text-xs text-gray-500">Teacher</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-black transition-colors duration-300">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-2xl font-light mb-6">Ready to Start Organizing Your Time?</h2>
+            <p class="text-gray-400 mb-8 max-w-2xl mx-auto">
+                Start using CalendarPro now and take control of your schedule, tasks, and deadlines.
+            </p>
+            <a href="calendar.html" class="bg-white text-black hover:bg-gray-200 font-light py-3 px-8 rounded-none transition-colors inline-block">
+                Start Using CalendarPro
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12 border-t border-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="bg-white text-black p-1 rounded">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                        </div>
+                        <span class="text-lg font-light">Calendar<span class="text-accent-500">Pro</span></span>
+                    </div>
+                    <p class="text-gray-500 max-w-xs">
+                        A modern, intuitive calendar system to help you efficiently manage tasks, deadlines, and schedules.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">Quick Links</h3>
+                        <ul class="space-y-2">
+                            <li><a href="index.html" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                            <li><a href="intro.html" class="text-gray-400 hover:text-white transition-colors">Introduction</a></li>
+                            <li><a href="calendar.html" class="text-gray-400 hover:text-white transition-colors">Calendar</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">Features</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Task Management</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Deadline Tracking</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Daily Schedule</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">Contact Us</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-center">
+                                <i class="fa fa-envelope-o mr-2 text-accent-500" aria-hidden="true"></i>
+                                <a href="mailto:info@calendarpro.com" class="text-gray-400 hover:text-white transition-colors">info@calendarpro.com</a>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fa fa-phone mr-2 text-accent-500" aria-hidden="true"></i>
+                                <span class="text-gray-400">+1 (555) 123-4567</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 mb-4 md:mb-0">© 2025 CalendarPro. All rights reserved.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fa fa-facebook" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fa fa-twitter" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fa fa-instagram" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Typing Effect
+        const typingEffect = (element, words, typingSpeed = 100, pauseTime = 1000) => {
+            let wordIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+          
+            function type() {
+                const currentWord = words[wordIndex];
+              
+                if (isDeleting) {
+                    // 删除字符
+                    element.textContent = currentWord.substring(0, charIndex - 1);
+                    charIndex--;
+                } else {
+                    // 添加字符
+                    element.textContent = currentWord.substring(0, charIndex + 1);
+                    charIndex++;
+                }
+              
+                // 处理删除/添加状态转换
+                if (!isDeleting && charIndex === currentWord.length) {
+                    isDeleting = true;
+                    setTimeout(type, pauseTime); // 完成单词后暂停
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    wordIndex = (wordIndex + 1) % words.length; // 循环切换单词
+                    setTimeout(type, 200); // 短暂暂停后开始新单词
+                } else {
+                    // 继续当前操作
+                    setTimeout(type, isDeleting ? typingSpeed/2 : typingSpeed);
+                }
+            }
+          
+            type(); // 启动动画
+        };
+
+        // Mouse Follow Effect
+        const mouseFollowEffect = () => {
+            const container = document.getElementById('mouse-follow-container');
+            let lastX = 0, lastY = 0;
+            const minDistance = 100; // 最小触发距离
+            const colors = [
+                'rgba(99, 102, 241, 0.1)',
+                'rgba(255, 255, 255, 0.05)',
+                'rgba(156, 163, 175, 0.1)'
+            ];
+          
+            document.addEventListener('mousemove', (e) => {
+                const currentX = e.clientX;
+                const currentY = e.clientY;
+              
+                // 计算与上次位置的距离
+                const distance = Math.sqrt(
+                    Math.pow(currentX - lastX, 2) + Math.pow(currentY - lastY, 2)
+                );
+              
+                // 如果移动距离足够大，创建新元素
+                if (distance > minDistance) {
+                    createFollowElement(currentX, currentY);
+                    lastX = currentX;
+                    lastY = currentY;
+                }
+            });
+          
+            function createFollowElement(x, y) {
+                // 随机选择颜色
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 创建圆形元素
+                const circle = document.createElement('div');
+                const size = Math.random() * 100 + 50; // 50-150px
+                
+                circle.className = 'mouse-follower rounded-full transition-all duration-500';
+                circle.style.width = `${size}px`;
+                circle.style.height = `${size}px`;
+                circle.style.backgroundColor = color;
+                circle.style.top = `${y - size/2}px`;
+                circle.style.left = `${x - size/2}px`;
+                circle.style.transform = 'scale(0)';
+              
+                container.appendChild(circle);
+              
+                // 强制重排后添加动画类
+                setTimeout(() => {
+                    circle.style.transform = 'scale(1)';
+                  
+                    // 1秒后开始淡出
+                    setTimeout(() => {
+                        circle.style.opacity = '0';
+                        circle.style.transform = 'scale(1.5)';
+                      
+                        // 动画完成后移除元素
+                        setTimeout(() => {
+                            container.removeChild(circle);
+                        }, 500);
+                    }, 500);
+                }, 10);
+            }
+        };
+
+        // Initialize effects when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize typing effect
+            typingEffect(
+                document.getElementById('typing-text'),
+                ['Student', 'Designer', 'Developer', 'Creator'],
+                80, 
+                1000
+            );
+            
+            // Initialize mouse follow effect
+            mouseFollowEffect();
+            
+            // Initialize scroll reveal effect
+            const revealElements = document.querySelectorAll('.grid > div');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            revealElements.forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

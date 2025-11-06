@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Website - Calendar</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        secondary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        task: {
+                            lecture: '#3b82f6',
+                            tutorial: '#10b981',
+                            training: '#f59e0b',
+                            meeting: '#8b5cf6',
+                            assignment: '#ef4444',
+                            exam: '#ec4899',
+                            break: '#6366f1',
+                            other: '#6b7280'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-in-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .bg-gradient-light {
+                background: linear-gradient(135deg, #e0f2fe 0%, #eef2ff 100%);
+            }
+            .bg-gradient-dark {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            }
+            .scrollbar-thin {
+                scrollbar-width: thin;
+            }
+            .scrollbar-thin::-webkit-scrollbar {
+                width: 6px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .scrollbar-thin::-webkit-scrollbar-thumb {
+                background-color: rgba(156, 163, 175, 0.5);
+                border-radius: 3px;
+            }
+            .task-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                display: inline-block;
+                margin-right: 4px;
+            }
+            .task-lecture { background-color: theme('colors.task.lecture'); }
+            .task-tutorial { background-color: theme('colors.task.tutorial'); }
+            .task-training { background-color: theme('colors.task.training'); }
+            .task-meeting { background-color: theme('colors.task.meeting'); }
+            .task-assignment { background-color: theme('colors.task.assignment'); }
+            .task-exam { background-color: theme('colors.task.exam'); }
+            .task-break { background-color: theme('colors.task.break'); }
+            .task-other { background-color: theme('colors.task.other'); }
+        }
+    </style>
+</head>
+<body class="min-h-screen transition bg.bg-gray-50 dark:bg-gray-900 transition-colors duration-300" id="body-element">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-900 shadow-md shadow-md shadow-2.5 shadow-md transition-colors duration-300 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items items-center">
+                <div class="flex items-center space-x-2">
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b5e1e873f23741a8b35ca632a3ca932f~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015245&x-signature=RKJB2ttdvlu0bEeRta72gb9uI9Q%3D" alt="Calendar Logo" class="h-10 w-10">
+                    <span class="text-xl font-bold text-primary-600 dark:text-primary-400">CalendarPro</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+                    <a href="intro.html" class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Introduction</a>
+                    <a href="calendar.html" class="text-primary-600 dark:text-primary-400 font-medium hover:text-primary-800 dark:hover:text-primary-300 transition-colors">Calendar</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fa fa-moon-o dark:hidden text-gray-600" aria-hidden="true"></i>
+                        <i class="fa fa-sun-o hidden dark:block text-yellow-300" aria-hidden="true"></i>
+                    </button>
+                    <button class="md:hidden" id="mobile-menu-button">
+                        <i class="fa fa-bars text-gray-600 dark:text-gray-300" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden hidden pt-4 pb-2 animate-fade-in">
+                <a href="index.html" class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+                <a href="intro.html" class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Introduction</a>
+                <a href="calendar.html" class="block py-2 text-primary-600 dark:text-primary-400 font-medium">Calendar</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Side - Calendar and Task Management -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Monthly Calendar -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 dark:text-white" id="current-month">November 2025</h2>
+                        <div class="flex space-x-2">
+                            <button id="prev-month" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <i class="fa fa-chevron-left text-gray-600 dark:text-gray-300" aria-hidden="true"></i>
+                            </button>
+                            <button id="today-btn" class="px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors">Today</button>
+                            <button id="next-month" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <i class="fa fa-chevron-right text-gray-600 dark:text-gray-300" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="grid grid-cols-7 gap-1 mb-2">
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Sun</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Mon</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Tue</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Wed</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Thu</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Fri</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Sat</div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1" id="calendar-grid">
+                        <!-- Calendar days will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Add Task and Deadline Buttons -->
+                <div class="flex flex-wrap gap-4">
+                    <button id="add-task-btn" class="flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fa fa-plus-circle mr-2" aria-hidden="true"></i>Add Task
+                    </button>
+                    <button id="add-deadline-btn" class="flex items-center bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fa fa-calendar-times-o mr-2" aria-hidden="true"></i>Add Deadline
+                    </button>
+                </div>
+                
+                <!-- Task List -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Tasks for <span id="selected-date-display">Today</span></h2>
+                    <div id="tasks-container" class="space-y-3">
+                        <!-- Tasks will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Deadline List -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Deadlines</h2>
+                    <div id="deadlines-container" class="space-y-3">
+                        <!-- Deadlines will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side - Daily Schedule and Today's Summary -->
+            <div class="space-y-6">
+                <!-- Daily Schedule -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Today's Schedule</h2>
+                    <div class="overflow-y-auto max-h-[500px] scrollbar-thin" id="daily-schedule">
+                        <!-- Daily schedule will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Today's Summary -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Today's Summary</h2>
+                    
+                    <!-- Today's Tasks -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Tasks</h3>
+                        <div id="today-tasks-container" class="space-y-2">
+                            <!-- Today's tasks will be generated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Today's Deadlines -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Deadlines</h3>
+                        <div id="today-deadlines-container" class="space-y-2">
+                            <!-- Today's deadlines will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div id="add-task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New Task</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form id="add-task-form">
+                <input type="hidden" id="task-date" value="">
+                
+                <div class="mb-4">
+                    <label for="task-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Name</label>
+                    <input type="text" id="task-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Type</label>
+                        <select id="task-type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                            <option value="lecture">Lecture</option>
+                            <option value="tutorial">Tutorial</option>
+                            <option value="training">Training</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="assignment">Assignment</option>
+                            <option value="exam">Exam</option>
+                            <option value="break">Break</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="task-date-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                        <input type="date" id="task-date-input" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="start-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
+                        <input type="time" id="start-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="end-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
+                        <input type="time" id="end-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                    <input type="text" id="location" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <textarea id="description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
+                    <input type="url" id="link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="button" class="close-modal bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="bg-primary-600 text-white font-medium py-2 px-4 rounded-md hover:bg-primary-700 transition-colors">Add Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Deadline Modal -->
+    <div id="add-deadline-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New Deadline</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form id="add-deadline-form">
+                <input type="hidden" id="deadline-date" value="">
+                
+                <div class="mb-4">
+                    <label for="deadline-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline Name</label>
+                    <input type="text" id="deadline-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="deadline-date-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                        <input type="date" id="deadline-date-input" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="deadline-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+                        <input type="time" id="deadline-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="deadline-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <textarea id="deadline-description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="deadline-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
+                    <input type="url" id="deadline-link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="button" class="close-modal bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="bg-red-600 text-white font-medium py-2 px-4 rounded-md hover:bg-red-700 transition-colors">Add Deadline</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="edit-task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Edit Task</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form id="edit-task-form">
+                <input type="hidden" id="edit-task-id" value="">
+                
+                <div class="mb-4">
+                    <label for="edit-task-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Name</label>
+                    <input type="text" id="edit-task-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="edit-task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Type</label>
+                        <select id="edit-task-type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                            <option value="lecture">Lecture</option>
+                            <option value="tutorial">Tutorial</option>
+                            <option value="training">Training</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="assignment">Assignment</option>
+                            <option value="exam">Exam</option>
+                            <option value="break">Break</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-task-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                        <input type="date" id="edit-task-date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="edit-start-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
+                        <input type="time" id="edit-start-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="edit-end-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
+                        <input type="time" id="edit-end-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit-location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                    <input type="text" id="edit-location" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <textarea id="edit-description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
+                    <input type="url" id="edit-link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="button" id="delete-task-btn" class="bg-red-600 text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-red-700 transition-colors">Delete</button>
+                    <button type="button" class="close-modal bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="bg-primary-600 text-white font-medium py-2 px-4 rounded-md hover:bg-primary-700 transition-colors">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Deadline Modal -->
+    <div id="edit-deadline-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Edit Deadline</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form id="edit-deadline-form">
+                <input type="hidden" id="edit-deadline-id" value="">
+                
+                <div class="mb-4">
+                    <label for="edit-deadline-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline Name</label>
+                    <input type="text" id="edit-deadline-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="edit-deadline-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                        <input type="date" id="edit-deadline-date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="edit-deadline-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+                        <input type="time" id="edit-deadline-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit-deadline-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <textarea id="edit-deadline-description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit-deadline-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
+                    <input type="url" id="edit-deadline-link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="button" id="delete-deadline-btn" class="bg-red-600 text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-red-700 transition-colors">Delete</button>
+                    <button type="button" class="close-modal bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="bg-red-600 text-white font-medium py-2 px-4 rounded-md hover:bg-red-700 transition-colors">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const bodyElement = document.getElementById('body-element');
+        
+        // Check for saved theme preference or use system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            bodyElement.classList.add('dark');
+        } else {
+            bodyElement.classList.remove('dark');
+        }
+        
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            bodyElement.classList.toggle('dark');
+            
+            // Save preference to localStorage
+            if (bodyElement.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'light';
+            }
+        });
+        
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Calendar Functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize data storage
+            if (!localStorage.getItem('tasks')) {
+                localStorage.setItem('tasks', JSON.stringify([]));
+            }
+            
+            if (!localStorage.getItem('deadlines')) {
+                localStorage.setItem('deadlines', JSON.stringify([]));
+            }
+            
+            // Sample data for demonstration
+            const sampleTasks = [
+                {
+                    id: generateId(),
+                    name: 'Introduction to Computer Science',
+                    type: 'lecture',
+                    date: '2025-11-23',
+                    startTime: '09:00',
+                    endTime: '11:00',
+                    location: 'Main Hall, Building A',
+                    description: 'First lecture of the semester covering basic concepts',
+                    link: 'https://example.com/lecture1'
+                },
+                {
+                    id: generateId(),
+                    name: 'Programming Basics Tutorial',
+                    type: 'tutorial',
+                    date: '2025-11-23',
+                    startTime: '12:00',
+                    endTime: '14:00',
+                    location: 'Computer Lab, Building B',
+                    description: 'Hands-on session for programming fundamentals',
+                    link: 'https://example.com/tutorial1'
+                },
+                {
+                    id: generateId(),
+                    name: 'Project Discussion Meeting',
+                    type: 'meeting',
+                    date: '2025-11-23',
+                    startTime: '15:00',
+                    endTime: '16:00',
+                    location: 'Conference Room, Building C',
+                    description: 'Group discussion for the upcoming project',
+                    link: 'https://example.com/project1'
+                },
+                {
+                    id: generateId(),
+                    name: 'Data Structures Lecture',
+                    type: 'lecture',
+                    date: '2025-11-24',
+                    startTime: '10:00',
+                    endTime: '12:00',
+                    location: 'Main Hall, Building A',
+                    description: 'Lecture on arrays, linked lists, and trees',
+                    link: 'https://example.com/lecture2'
+                }
+            ];
+            
+            const sampleDeadlines = [
+                {
+                    id: generateId(),
+                    name: 'Data Structures Assignment',
+                    date: '2025-11-23',
+                    time: '23:59',
+                    description: 'Complete the assignment on linked lists',
+                    link: 'https://example.com/assignment1'
+                },
+                {
+                    id: generateId(),
+                    name: 'Midterm Exam Registration',
+                    date: '2025-11-25',
+                    time: '18:00',
+                    description: 'Last day to register for midterm exams',
+                    link: 'https://example.com/registration'
+                }
+            ];
+            
+            // Only add sample data if there are no existing tasks or deadlines
+            const tasks = JSON.parse(localStorage.getItem('tasks'));
+            const deadlines = JSON.parse(localStorage.getItem('deadlines'));
+            
+            if (tasks.length === 0) {
+                localStorage.setItem('tasks', JSON.stringify(sampleTasks));
+            }
+            
+            if (deadlines.length === 0) {
+                localStorage.setItem('deadlines', JSON.stringify(sampleDeadlines));
+            }
+            
+            // Calendar variables
+            const calendarGrid = document.getElementById('calendar-grid');
+            const currentMonthElement = document.getElementById('current-month');
+            const prevMonthButton = document.getElementById('prev-month');
+            const nextMonthButton = document.getElementById('next-month');
+            const todayButton = document.getElementById('today-btn');
+            const selectedDateDisplay = document.getElementById('selected-date-display');
+            
+            let currentDate = new Date();
+            let selectedDate = new Date();
+            
+            // Modal variables
+            const addTaskModal = document.getElementById('add-task-modal');
+            const addDeadlineModal = document.getElementById('add-deadline-modal');
+            const editTaskModal = document.getElementById('edit-task-modal');
+            const editDeadlineModal = document.getElementById('edit-deadline-modal');
+            
+            const addTaskButton = document.getElementById('add-task-btn');
+            const addDeadlineButton = document.getElementById('add-deadline-btn');
+            
+            const closeModalButtons = document.querySelectorAll('.close-modal');
+            
+            // Form variables
+            const addTaskForm = document.getElementById('add-task-form');
+            const addDeadlineForm = document.getElementById('add-deadline-form');
+            const editTaskForm = document.getElementById('edit-task-form');
+            const editDeadlineForm = document.getElementById('edit-deadline-form');
+            
+            const deleteTaskButton = document.getElementById('delete-task-btn');
+            const deleteDeadlineButton = document.getElementById('delete-deadline-btn');
+            
+            // Render calendar
+            function renderCalendar(year, month) {
+                // Clear previous calendar
+                calendarGrid.innerHTML = '';
+                
+                // Update current month display
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                currentMonthElement.textContent = `${monthNames[month]} ${year}`;
+                
+                // Get first day of the month
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                
+                // Get number of days in the month
+                const daysInMonth = lastDay.getDate();
+                
+                // Get day of the week for the first day (0 = Sunday, 6 = Saturday)
+                const firstDayOfWeek = firstDay.getDay();
+                
+                // Create empty cells for days before the first day of the month
+                for (let i = 0; i < firstDayOfWeek; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'h-16 flex flex-col items-center justify-start p-1 text-gray-400 dark:text-gray-500';
+                    calendarGrid.appendChild(emptyCell);
+                }
+                
+                // Get tasks and deadlines
+                const tasks = JSON.parse(localStorage.getItem('tasks'));
+                const deadlines = JSON.parse(localStorage.getItem('deadlines'));
+                
+                // Create cells for each day of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'h-16 flex flex-col items-center justify-start p-1 border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer';
+                    
+                    // Check if this is the current day
+                    const isCurrentDay = day === currentDate.getDate() && month === currentDate.getMonth() && year === currentDate.getFullYear();
+                    
+                    // Check if this is the selected day
+                    const isSelectedDay = day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear();
+                    
+                    // Add appropriate classes
+                    if (isSelectedDay) {
+                        dayCell.classList.add('bg-primary-100', 'dark:bg-primary-900');
+                    }
+                    
+                    if (isCurrentDay) {
+                        dayCell.classList.add('ring-2', 'ring-primary-500', 'dark:ring-primary-400');
+                    }
+                    
+                    // Create day number element
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'text-sm font-medium';
+                    dayNumber.textContent = day;
+                    
+                    // Add day number to cell
+                    dayCell.appendChild(dayNumber);
+                    
+                    // Get tasks and deadlines for this day
+                    const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayTasks = tasks.filter(task => task.date === dateString);
+                    const dayDeadlines = deadlines.filter(deadline => deadline.date === dateString);
+                    
+                    // Create indicators container
+                    const indicatorsContainer = document.createElement('div');
+                    indicatorsContainer.className = 'flex flex-wrap gap-1 mt-1 w-full';
+                    
+                    // Add task indicators
+                    dayTasks.slice(0, 2).forEach(task => {
+                        const taskIndicator = document.createElement('div');
+                        taskIndicator.className = `task-dot task-${task.type}`;
+                        indicatorsContainer.appendChild(taskIndicator);
+                    });
+                    
+                    // Add deadline indicators
+                    dayDeadlines.slice(0, 2).forEach(() => {
+                        const deadlineIndicator = document.createElement('div');
+                        deadlineIndicator.className = 'task-dot task-assignment';
+                        indicatorsContainer.appendChild(deadlineIndicator);
+                    });
+                    
+                    // Add more indicator if there are more than 2 tasks or deadlines
+                    const totalIndicators = dayTasks.length + dayDeadlines.length;
+                    if (totalIndicators > 4) {
+                        const moreIndicator = document.createElement('div');
+                        moreIndicator.className = 'text-xs text-gray-500 dark:text-gray-400';
+                        moreIndicator.textContent = `+${totalIndicators - 4}`;
+                        indicatorsContainer.appendChild(moreIndicator);
+                    }
+                    
+                    // Add indicators to cell
+                    dayCell.appendChild(indicatorsContainer);
+                    
+                    // Add click event to select date
+                    dayCell.addEventListener('click', () => {
+                        selectedDate = new Date(year, month, day);
+                        selectedDateDisplay.textContent = formatDate(selectedDate);
+                        renderCalendar(year, month);
+                        renderTasks();
+                        renderDeadlines();
+                        renderDailySchedule();
+                        renderTodaySummary();
+                    });
+                    
+                    // Add day cell to calendar grid
+                    calendarGrid.appendChild(dayCell);
+                }
+            }
+            
+            // Render tasks for selected date
+            function renderTasks() {
+                const tasksContainer = document.getElementById('tasks-container');
+                tasksContainer.innerHTML = '';
+                
+                const dateString = formatDateForStorage(selectedDate);
+                const tasks = JSON.parse(localStorage.getItem('tasks')).filter(task => task.date === dateString);
+                
+                if (tasks.length === 0) {
+                    const noTasksMessage = document.createElement('div');
+                    noTasksMessage.className = 'text-gray-500 dark:text-gray-400 text-center py-4';
+                    noTasksMessage.textContent = 'No tasks scheduled for this day';
+                    tasksContainer.appendChild(noTasksMessage);
+                    return;
+                }
+                
+                // Sort tasks by start time
+                tasks.sort((a, b) => {
+                    if (a.startTime < b.startTime) return -1;
+                    if (a.startTime > b.startTime) return 1;
+                    return 0;
+                });
+                
+                tasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = `bg-${task.type}-50 dark:bg-${task.type}-900/30 p-3 rounded-md border border-${task.type}-100 dark:border-${task.type}-800 hover:shadow-md transition-shadow cursor-pointer`;
+                    
+                    const taskHeader = document.createElement('div');
+                    taskHeader.className = 'flex justify-between items-center';
+                    
+                    const taskTitle = document.createElement('div');
+                    taskTitle.className = `font-medium text-${task.type}-700 dark:text-${task.type}-300 flex items-center`;
+                    
+                    const taskDot = document.createElement('span');
+                    taskDot.className = `task-dot task-${task.type}`;
+                    
+                    const taskName = document.createElement('span');
+                    taskName.textContent = task.name;
+                    
+                    taskTitle.appendChild(taskDot);
+                    taskTitle.appendChild(taskName);
+                    
+                    const taskTime = document.createElement('span');
+                    taskTime.className = `text-sm text-${task.type}-600 dark:text-${task.type}-400`;
+                    taskTime.textContent = `${task.startTime} - ${task.endTime}`;
+                    
+                    taskHeader.appendChild(taskTitle);
+                    taskHeader.appendChild(taskTime);
+                    
+                    const taskLocation = document.createElement('p');
+                    taskLocation.className = 'text-sm text-gray-600 dark:text-gray-300 mt-1';
+                    taskLocation.textContent = task.location || 'No location specified';
+                    
+                    taskElement.appendChild(taskHeader);
+                    taskElement.appendChild(taskLocation);
+                    
+                    // Add click event to edit task
+                    taskElement.addEventListener('click', () => {
+                        openEditTaskModal(task);
+                    });
+                    
+                    tasksContainer.appendChild(taskElement);
+                });
+            }
+            
+            // Render deadlines
+            function renderDeadlines() {
+                const deadlinesContainer = document.getElementById('deadlines-container');
+                deadlinesContainer.innerHTML = '';
+                
+                const deadlines = JSON.parse(localStorage.getItem('deadlines'));
+                
+                // Sort deadlines by date and time
+                deadlines.sort((a, b) => {
+                    if (a.date < b.date) return -1;
+                    if (a.date > b.date) return 1;
+                    if (a.time < b.time) return -1;
+                    if (a.time > b.time) return 1;
+                    return 0;
+                });
+                
+                if (deadlines.length === 0) {
+                    const noDeadlinesMessage = document.createElement('div');
+                    noDeadlinesMessage.className = 'text-gray-500 dark:text-gray-400 text-center py-4';
+                    noDeadlinesMessage.textContent = 'No deadlines scheduled';
+                    deadlinesContainer.appendChild(noDeadlinesMessage);
+                    return;
+                }
+                
+                deadlines.forEach(deadline => {
+                    const deadlineElement = document.createElement('div');
+                    deadlineElement.className = 'bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800 hover:shadow-md transition-shadow cursor-pointer';
+                    
+                    const deadlineHeader = document.createElement('div');
+                    deadlineHeader.className = 'flex justify-between items-center';
+                    
+                    const deadlineTitle = document.createElement('div');
+                    deadlineTitle.className = 'font-medium text-red-700 dark:text-red-300 flex items-center';
+                    
+                    const deadlineDot = document.createElement('span');
+                    deadlineDot.className = 'task-dot task-assignment';
+                    
+                    const deadlineName = document.createElement('span');
+                    deadlineName.textContent = deadline.name;
+                    
+                    deadlineTitle.appendChild(deadlineDot);
+                    deadlineTitle.appendChild(deadlineName);
+                    
+                    const deadlineDateTime = document.createElement('span');
+                    deadlineDateTime.className = 'text-sm text-red-600 dark:text-red-400';
+                    
+                    const deadlineDate = new Date(deadline.date);
+                    deadlineDateTime.textContent = `${formatDate(deadlineDate)} ${deadline.time}`;
+                    
+                    deadlineHeader.appendChild(deadlineTitle);
+                    deadlineHeader.appendChild(deadlineDateTime);
+                    
+                    const deadlineDescription = document.createElement('p');
+                    deadlineDescription.className = 'text-sm text-gray-600 dark:text-gray-300 mt-1';
+                    deadlineDescription.textContent = deadline.description || 'No description provided';
+                    
+                    deadlineElement.appendChild(deadlineHeader);
+                    deadlineElement.appendChild(deadlineDescription);
+                    
+                    // Add click event to edit deadline
+                    deadlineElement.addEventListener('click', () => {
+                        openEditDeadlineModal(deadline);
+                    });
+                    
+                    deadlinesContainer.appendChild(deadlineElement);
+                });
+            }
+            
+            // Render daily schedule
+            function renderDailySchedule() {
+                const dailyScheduleContainer = document.getElementById('daily-schedule');
+                dailyScheduleContainer.innerHTML = '';
+                
+                const dateString = formatDateForStorage(selectedDate);
+                const tasks = JSON.parse(localStorage.getItem('tasks')).filter(task => task.date === dateString);
+                
+                // Sort tasks by start time
+                tasks.sort((a, b) => {
+                    if (a.startTime < b.startTime) return -1;
+                    if (a.startTime > b.startTime) return 1;
+                    return 0;
+                });
+                
+                // Create time slots from 6:00 AM to 10:00 PM
+                for (let hour = 6; hour <= 22; hour++) {
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'flex items-center py-1 border-b border-gray-200 dark:border-gray-700';
+                    
+                    const timeLabel = document.createElement('div');
+                    timeLabel.className = 'w-16 text-sm text-gray-500 dark:text-gray-400';
+                    timeLabel.textContent = formatTime(hour);
+                    
+                    const timeContent = document.createElement('div');
+                    timeContent.className = 'flex-1 pl-2';
+                    
+                    // Check if there are tasks for this hour
+                    const hourTasks = tasks.filter(task => {
+                        const taskHour = parseInt(task.startTime.split(':')[0]);
+                        return taskHour === hour;
+                    });
+                    
+                    if (hourTasks.length > 0) {
+                        hourTasks.forEach(task => {
+                            const taskElement = document.createElement('div');
+                            taskElement.className = `bg-${task.type}-100 dark:bg-${task.type}-900 rounded p-1 border border-${task.type}-200 dark:border-${task.type}-800 mb-1`;
+                            
+                            const taskTitle = document.createElement('div');
+                            taskTitle.className = `bg-${task.type}-500 dark:bg-${task.type}-600 text-white text-xs p-1 rounded truncate`;
+                            taskTitle.textContent = task.name;
+                            
+                            taskElement.appendChild(taskTitle);
+                            timeContent.appendChild(taskElement);
+                            
+                            // Add click event to edit task
+                            taskElement.addEventListener('click', () => {
+                                openEditTaskModal(task);
+                            });
+                        });
+                    }
+                    
+                    timeSlot.appendChild(timeLabel);
+                    timeSlot.appendChild(timeContent);
+                    dailyScheduleContainer.appendChild(timeSlot);
+                }
+            }
+            
+            // Render today's summary
+            function renderTodaySummary() {
+                const todayTasksContainer = document.getElementById('today-tasks-container');
+                const todayDeadlinesContainer = document.getElementById('today-deadlines-container');
+                
+                todayTasksContainer.innerHTML = '';
+                todayDeadlinesContainer.innerHTML = '';
+                
+                const todayString = formatDateForStorage(currentDate);
+                const tasks = JSON.parse(localStorage.getItem('tasks')).filter(task => task.date === todayString);
+                const deadlines = JSON.parse(localStorage.getItem('deadlines')).filter(deadline => deadline.date === todayString);
+                
+                // Sort tasks by start time
+                tasks.sort((a, b) => {
+                    if (a.startTime < b.startTime) return -1;
+                    if (a.startTime > b.startTime) return 1;
+                    return 0;
+                });
+                
+                // Sort deadlines by time
+                deadlines.sort((a, b) => {
+                    if (a.time < b.time) return -1;
+                    if (a.time > b.time) return 1;
+                    return 0;
+                });
+                
+                // Add tasks
+                if (tasks.length === 0) {
+                    const noTasksMessage = document.createElement('div');
+                    noTasksMessage.className = 'text-gray-500 dark:text-gray-400 text-center py-2';
+                    noTasksMessage.textContent = 'No tasks for today';
+                    todayTasksContainer.appendChild(noTasksMessage);
+                } else {
+                    tasks.forEach(task => {
+                        const taskElement = document.createElement('div');
+                        taskElement.className = `bg-${task.type}-50 dark:bg-${task.type}-900/30 p-2 rounded-md border border-${task.type}-100 dark:border-${task.type}-800 text-sm`;
+                        
+                        const taskHeader = document.createElement('div');
+                        taskHeader.className = 'flex justify-between items-center';
+                        
+                        const taskTitle = document.createElement('div');
+                        taskTitle.className = `font-medium text-${task.type}-700 dark:text-${task.type}-300 flex items-center`;
+                        
+                        const taskDot = document.createElement('span');
+                        taskDot.className = `task-dot task-${task.type}`;
+                        
+                        const taskName = document.createElement('span');
+                        taskName.textContent = task.name;
+                        
+                        taskTitle.appendChild(taskDot);
+                        taskTitle.appendChild(taskName);
+                        
+                        const taskTime = document.createElement('span');
+                        taskTime.className = `text-xs text-${task.type}-600 dark:text-${task.type}-400`;
+                        taskTime.textContent = `${task.startTime} - ${task.endTime}`;
+                        
+                        taskHeader.appendChild(taskTitle);
+                        taskHeader.appendChild(taskTime);
+                        
+                        taskElement.appendChild(taskHeader);
+                        
+                        // Add click event to edit task
+                        taskElement.addEventListener('click', () => {
+                            openEditTaskModal(task);
+                        });
+                        
+                        todayTasksContainer.appendChild(taskElement);
+                    });
+                }
+                
+                // Add deadlines
+                if (deadlines.length === 0) {
+                    const noDeadlinesMessage = document.createElement('div');
+                    noDeadlinesMessage.className = 'text-gray-500 dark:text-gray-400 text-center py-2';
+                    noDeadlinesMessage.textContent = 'No deadlines for today';
+                    todayDeadlinesContainer.appendChild(noDeadlinesMessage);
+                } else {
+                    deadlines.forEach(deadline => {
+                        const deadlineElement = document.createElement('div');
+                        deadlineElement.className = 'bg-red-50 dark:bg-red-900/30 p-2 rounded-md border border-red-100 dark:border-red-800 text-sm';
+                        
+                        const deadlineHeader = document.createElement('div');
+                        deadlineHeader.className = 'flex justify-between items-center';
+                        
+                        const deadlineTitle = document.createElement('div');
+                        deadlineTitle.className = 'font-medium text-red-700 dark:text-red-300 flex items-center';
+                        
+                        const deadlineDot = document.createElement('span');
+                        deadlineDot.className = 'task-dot task-assignment';
+                        
+                        const deadlineName = document.createElement('span');
+                        deadlineName.textContent = deadline.name;
+                        
+                        deadlineTitle.appendChild(deadlineDot);
+                        deadlineTitle.appendChild(deadlineName);
+                        
+                        const deadlineTime = document.createElement('span');
+                        deadlineTime.className = 'text-xs text-red-600 dark:text-red-400';
+                        deadlineTime.textContent = deadline.time;
+                        
+                        deadlineHeader.appendChild(deadlineTitle);
+                        deadlineHeader.appendChild(deadlineTime);
+                        
+                        deadlineElement.appendChild(deadlineHeader);
+                        
+                        // Add click event to edit deadline
+                        deadlineElement.addEventListener('click', () => {
+                            openEditDeadlineModal(deadline);
+                        });
+                        
+                        todayDeadlinesContainer.appendChild(deadlineElement);
+                    });
+                }
+            }
+            
+            // Open add task modal
+            function openAddTaskModal() {
+                const taskDateInput = document.getElementById('task-date-input');
+                const taskDate = document.getElementById('task-date');
+                
+                // Set default date to selected date
+                const defaultDate = formatDateForInput(selectedDate);
+                taskDateInput.value = defaultDate;
+                taskDate.value = defaultDate;
+                
+                // Reset form
+                addTaskForm.reset();
+                
+                // Show modal
+                addTaskModal.classList.remove('hidden');
+            }
+            
+            // Open add deadline modal
+            function openAddDeadlineModal() {
+                const deadlineDateInput = document.getElementById('deadline-date-input');
+                const deadlineDate = document.getElementById('deadline-date');
+                
+                // Set default date to selected date
+                const defaultDate = formatDateForInput(selectedDate);
+                deadlineDateInput.value = defaultDate;
+                deadlineDate.value = defaultDate;
+                
+                // Reset form
+                addDeadlineForm.reset();
+                
+                // Show modal
+                addDeadlineModal.classList.remove('hidden');
+            }
+            
+            // Open edit task modal
+            function openEditTaskModal(task) {
+                document.getElementById('edit-task-id').value = task.id;
+                document.getElementById('edit-task-name').value = task.name;
+                document.getElementById('edit-task-type').value = task.type;
+                document.getElementById('edit-task-date').value = task.date;
+                document.getElementById('edit-start-time').value = task.startTime;
+                document.getElementById('edit-end-time').value = task.endTime;
+                document.getElementById('edit-location').value = task.location || '';
+                document.getElementById('edit-description').value = task.description || '';
+                document.getElementById('edit-link').value = task.link || '';
+                
+                // Show modal
+                editTaskModal.classList.remove('hidden');
+            }
+            
+            // Open edit deadline modal
+            function openEditDeadlineModal(deadline) {
+                document.getElementById('edit-deadline-id').value = deadline.id;
+                document.getElementById('edit-deadline-name').value = deadline.name;
+                document.getElementById('edit-deadline-date').value = deadline.date;
+                document.getElementById('edit-deadline-time').value = deadline.time;
+                document.getElementById('edit-deadline-description').value = deadline.description || '';
+                document.getElementById('edit-deadline-link').value = deadline.link || '';
+                
+                // Show modal
+                editDeadlineModal.classList.remove('hidden');
+            }
+            
+            // Close all modals
+            function closeAllModals() {
+                addTaskModal.classList.add('hidden');
+                addDeadlineModal.classList.add('hidden');
+                editTaskModal.classList.add('hidden');
+                editDeadlineModal.classList.add('hidden');
+            }
+            
+            // Add task
+            function addTask(taskData) {
+                const tasks = JSON.parse(localStorage.getItem('tasks'));
+                tasks.push(taskData);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                
+                // Refresh views
+                renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
+                renderTasks();
+                renderDailySchedule();
+                renderTodaySummary();
+            }
+            
+            // Add deadline
+            function addDeadline(deadlineData) {
+                const deadlines = JSON.parse(localStorage.getItem('deadlines'));
+                deadlines.push(deadlineData);
+                localStorage.setItem('deadlines', JSON.stringify(deadlines));
+                
+                // Refresh views
+                renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
+                renderDeadlines();
+                renderTodaySummary();
+            }
+            
+            // Update task
+            function updateTask(taskId, updatedData) {
+                const tasks = JSON.parse(localStorage.getItem('tasks'));
+                const taskIndex = tasks.findIndex(task => task.id === taskId);
+                
+                if (taskIndex !== -1) {
+                    tasks[taskIndex] = { ...tasks[taskIndex], ...updatedData };
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    
+                    // Refresh views
+                    renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
+                    renderTasks();
+                    renderDailySchedule();
+                    renderTodaySummary();
+                }
+            }
+            
+            // Update deadline
+            function updateDeadline(deadlineId, updatedData) {
+                const deadlines = JSON.parse(localStorage.getItem('deadlines'));
+                const deadlineIndex = deadlines.findIndex(deadline => deadline.id === deadlineId);
+                
+                if (deadlineIndex !== -1) {
+                    deadlines[deadlineIndex] = { ...deadlines[deadlineIndex], ...updatedData };
+                    localStorage.setItem('deadlines', JSON.stringify(deadlines));
+                    
+                    // Refresh views
+                    renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
+                    renderDeadlines();
+                    renderTodaySummary();
+                }
+            }
+            
+            // Delete task
+            function deleteTask(taskId) {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    const tasks = JSON.parse(localStorage.getItem('tasks'));
+                    const updatedTasks = tasks.filter(task => task.id !== taskId);
+                    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+                    
+                    // Close modal
+                    closeAllModals();
+                    
+                    // Refresh views
+                    renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
+                    renderTasks();
+                    renderDailySchedule();
+                    renderTodaySummary();
+                }
+            }
+            
+            // Delete deadline
+            function deleteDeadline(deadlineId) {
+                if (confirm('Are you sure you want to delete this deadline?')) {
+                    const deadlines = JSON.parse(localStorage.getItem('deadlines'));
+                    const updatedDeadlines = deadlines.filter(deadline => deadline.id !== deadlineId);
+                    localStorage.setItem('deadlines', JSON.stringify(updatedDeadlines));
+                    
+                    // Close modal
+                    closeAllModals();
+                    
+                    // Refresh views
+                    renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
+                    renderDeadlines();
+                    renderTodaySummary();
+                }
+            }
+            
+            // Event Listeners
+            prevMonthButton.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+            });
+            
+            nextMonthButton.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+            });
+            
+            todayButton.addEventListener('click', () => {
+                currentDate = new Date();
+                selectedDate = new Date();
+                selectedDateDisplay.textContent = 'Today';
+                renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+                renderTasks();
+                renderDeadlines();
+                renderDailySchedule();
+                renderTodaySummary();
+            });
+            
+            addTaskButton.addEventListener('click', openAddTaskModal);
+            addDeadlineButton.addEventListener('click', openAddDeadlineModal);
+            
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', closeAllModals);
+            });
+            
+            addTaskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const taskData = {
+                    id: generateId(),
+                    name: document.getElementById('task-name').value,
+                    type: document.getElementById('task-type').value,
+                    date: document.getElementById('task-date').value,
+                    startTime: document.getElementById('start-time').value,
+                    endTime: document.getElementById('end-time').value,
+                    location: document.getElementById('location').value,
+                    description: document.getElementById('description').value,
+                    link: document.getElementById('link').value
+                };
+                
+                addTask(taskData);
+                closeAllModals();
+            });
+            
+            addDeadlineForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const deadlineData = {
+                    id: generateId(),
+                    name: document.getElementById('deadline-name').value,
+                    date: document.getElementById('deadline-date').value,
+                    time: document.getElementById('deadline-time').value,
+                    description: document.getElementById('deadline-description').value,
+                    link: document.getElementById('deadline-link').value
+                };
+                
+                addDeadline(deadlineData);
+                closeAllModals();
+            });
+            
+            editTaskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const taskId = document.getElementById('edit-task-id').value;
+                const updatedData = {
+                    name: document.getElementById('edit-task-name').value,
+                    type: document.getElementById('edit-task-type').value,
+                    date: document.getElementById('edit-task-date').value,
+                    startTime: document.getElementById('edit-start-time').value,
+                    endTime: document.getElementById('edit-end-time').value,
+                    location: document.getElementById('edit-location').value,
+                    description: document.getElementById('edit-description').value,
+                    link: document.getElementById('edit-link').value
+                };
+                
+                updateTask(taskId, updatedData);
+                closeAllModals();
+            });
+            
+            editDeadlineForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const deadlineId = document.getElementById('edit-deadline-id').value;
+                const updatedData = {
+                    name: document.getElementById('edit-deadline-name').value,
+                    date: document.getElementById('edit-deadline-date').value,
+                    time: document.getElementById('edit-deadline-time').value,
+                    description: document.getElementById('edit-deadline-description').value,
+                    link: document.getElementById('edit-deadline-link').value
+                };
+                
+                updateDeadline(deadlineId, updatedData);
+                closeAllModals();
+            });
+            
+            deleteTaskButton.addEventListener('click', () => {
+                const taskId = document.getElementById('edit-task-id').value;
+                deleteTask(taskId);
+            });
+            
+            deleteDeadlineButton.addEventListener('click', () => {
+                const deadlineId = document.getElementById('edit-deadline-id').value;
+                deleteDeadline(deadlineId);
+            });
+            
+            // Set task date when date input changes
+            document.getElementById('task-date-input').addEventListener('change', (e) => {
+                document.getElementById('task-date').value = e.target.value;
+            });
+            
+            // Set deadline date when date input changes
+            document.getElementById('deadline-date-input').addEventListener('change', (e) => {
+                document.getElementById('deadline-date').value = e.target.value;
+            });
+            
+            // Initialize calendar
+            selectedDateDisplay.textContent = 'Today';
+            renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+            renderTasks();
+            renderDeadlines();
+            renderDailySchedule();
+            renderTodaySummary();
+        });
+        
+        // Helper Functions
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+        
+        function formatDate(date) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            return date.toLocaleDateString('en-US', options);
+        }
+        
+        function formatDateForStorage(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        function formatDateForInput(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        function formatTime(hour) {
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+            return `${displayHour}:00 ${period}`;
+        }
+    </script>
+</body>
+</html>
