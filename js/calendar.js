@@ -467,13 +467,12 @@ function renderTodaySummary() {
 // Create summary task element
 function createSummaryTaskElement(task) {
     const element = document.createElement('div');
-    element.className = `summary-item ${task.type}`;
-    element.style.backgroundColor = `${CalendarApp.getTaskColor(task.type)}15`;
-    element.style.borderLeft = `3px solid ${CalendarApp.getTaskColor(task.type)}`;
+    element.className = `summary-item task-item ${task.type}`;
     
     const title = document.createElement('div');
     title.style.fontWeight = '600';
     title.style.marginBottom = '0.25rem';
+    title.style.color = 'var(--text-primary)';
     title.textContent = task.name;
     
     const time = document.createElement('div');
@@ -491,13 +490,12 @@ function createSummaryTaskElement(task) {
 // Create summary deadline element
 function createSummaryDeadlineElement(deadline) {
     const element = document.createElement('div');
-    element.className = 'summary-item assignment';
-    element.style.backgroundColor = `${CalendarApp.getTaskColor('assignment')}15`;
-    element.style.borderLeft = `3px solid ${CalendarApp.getTaskColor('assignment')}`;
+    element.className = 'summary-item task-item assignment';
     
     const title = document.createElement('div');
     title.style.fontWeight = '600';
     title.style.marginBottom = '0.25rem';
+    title.style.color = 'var(--text-primary)';
     title.textContent = deadline.name;
     
     const time = document.createElement('div');

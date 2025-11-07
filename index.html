@@ -86,7 +86,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen-screen-screen-body bg-black text-white transition-colors duration-300" id="body-element">
+<body class="min-h-screen transition-colors duration-300">
     <!-- Navigation -->
     <nav class="bg-white dark:bg-gray-900 shadow-md transition-colors duration-300">
         <div class="container mx-auto px-4 py-3">
@@ -120,24 +120,24 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="bg-black-gradient min-h-[80vh] flex items-center justify-center transition-colors duration-300 relative overflow-hidden">
+    <section class="bg-gray-50 dark:bg-gray-900 min-h-[80vh] flex items-center justify-center transition-colors duration-300 relative overflow-hidden">
         <!-- Mouse Follower Container -->
         <div id="mouse-follow-container" class="fixed inset-0 pointer-events-none z-0"></div>
         
         <div class="container mx-auto px-4 py-16 relative z-10">
             <div class="flex flex-col items-center text-center">
-                <h1 class="text-4xl md:text-6xl font-light mb-4 animate-fade-in">
+                <h1 class="text-4xl md:text-6xl font-light mb-4 animate-fade-in text-gray-900 dark:text-white">
                     Simple<span class="text-accent-500">Calendar</span>
                 </h1>
-                <p class="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl animate-slide-up">
+                <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl animate-slide-up">
                     I am a
-                    <span id="typing-text" class="typing-cursor inline-block w-0 text-white"></span>
+                    <span id="typing-text" class="typing-cursor inline-block w-0 text-gray-900 dark:text-white"></span>
                 </p>
                 <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 animate-slide-up" style="animation-delay: 0.3s;">
-                    <a href="calendar.html" class="bg-white text-black hover:bg-gray-200 font-light py-3 px-8 rounded-none transition-colors text-center">
+                    <a href="calendar.html" class="bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 font-medium py-3 px-8 rounded-lg transition-colors text-center">
                         Use Now
                     </a>
-                    <a href="intro.html" class="bg-transparent border border-white text-white hover:bg-white hover:text-black font-light py-3 px-8 rounded-none transition-colors text-center">
+                    <a href="intro.html" class="bg-transparent border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-400 dark:hover:text-white font-medium py-3 px-8 rounded-lg transition-colors text-center">
                         Learn More
                     </a>
                 </div>
@@ -146,79 +146,79 @@
     </section>
 
     <!-- Features Section -->
-    <section class="py-20 bg-black transition-colors duration-300">
+    <section class="py-20 bg-white dark:bg-gray-800 transition-colors duration-300">
         <div class="container mx-auto px-4">
-            <h2 class="text-2xl font-light text-center mb-16 tracking-wider">Core Features</h2>
+            <h2 class="text-2xl font-light text-center mb-16 tracking-wider text-gray-900 dark:text-white">Core Features</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
                 <div class="group relative overflow-hidden">
-                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-800 dark:bg-gray-900 mb-4 overflow-hidden">
                         <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
                             <i class="fa fa-calendar text-6xl text-accent-500" aria-hidden="true"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-light mb-2">Interactive Calendar</h3>
-                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <h3 class="text-lg font-light mb-2 text-gray-900 dark:text-white">Interactive Calendar</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Intuitive monthly calendar view to easily manage your schedule and seamlessly navigate between different months and years.
                     </p>
                 </div>
                 <!-- Feature 2 -->
                 <div class="group relative overflow-hidden">
-                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-800 dark:bg-gray-900 mb-4 overflow-hidden">
                         <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
                             <i class="fa fa-tasks text-6xl text-accent-500" aria-hidden="true"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-light mb-2">Task Management</h3>
-                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <h3 class="text-lg font-light mb-2 text-gray-900 dark:text-white">Task Management</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Create, edit, and track tasks with detailed information including start time, end time, location, and description.
                     </p>
                 </div>
                 <!-- Feature 3 -->
                 <div class="group relative overflow-hidden">
-                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-800 dark:bg-gray-900 mb-4 overflow-hidden">
                         <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
                             <i class="fa fa-clock-o text-6xl text-accent-500" aria-hidden="true"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-light mb-2">Deadline Tracking</h3>
-                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <h3 class="text-lg font-light mb-2 text-gray-900 dark:text-white">Deadline Tracking</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Never miss important deadlines again. Set reminders for upcoming deadlines and stay on top of your commitments.
                     </p>
                 </div>
                 <!-- Feature 4 -->
                 <div class="group relative overflow-hidden">
-                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-800 dark:bg-gray-900 mb-4 overflow-hidden">
                         <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
                             <i class="fa fa-calendar-check-o text-6xl text-accent-500" aria-hidden="true"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-light mb-2">Daily Schedule</h3>
-                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <h3 class="text-lg font-light mb-2 text-gray-900 dark:text-white">Daily Schedule</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         View your day at a glance with hourly timeline view. Plan efficiently and stay on track throughout the day.
                     </p>
                 </div>
                 <!-- Feature 5 -->
                 <div class="group relative overflow-hidden">
-                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-800 dark:bg-gray-900 mb-4 overflow-hidden">
                         <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
                             <i class="fa fa-moon-o text-6xl text-accent-500" aria-hidden="true"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-light mb-2">Minimalist Design</h3>
-                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <h3 class="text-lg font-light mb-2 text-gray-900 dark:text-white">Minimalist Design</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Clean minimalist design reduces visual distractions, allowing you to focus on your content and tasks.
                     </p>
                 </div>
                 <!-- Feature 6 -->
                 <div class="group relative overflow-hidden">
-                    <div class="aspect-[4/3] bg-gray-900 mb-4 overflow-hidden">
+                    <div class="aspect-[4/3] bg-gray-800 dark:bg-gray-900 mb-4 overflow-hidden">
                         <div class="w-full h-full flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
                             <i class="fa fa-mobile text-6xl text-accent-500" aria-hidden="true"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-light mb-2">Responsive Design</h3>
-                    <p class="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <h3 class="text-lg font-light mb-2 text-gray-900 dark:text-white">Responsive Design</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Access your calendar from any device with fully responsive design that adapts to all screen sizes.
                     </p>
                 </div>
@@ -227,52 +227,52 @@
     </section>
 
     <!-- Testimonials Section -->
-    <section class="py-20 bg-gray-900 transition-colors duration-300">
+    <section class="py-20 bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
         <div class="container mx-auto px-4">
-            <h2 class="text-2xl font-light text-center mb-16 tracking-wider">User Reviews</h2>
+            <h2 class="text-2xl font-light text-center mb-16 tracking-wider text-gray-900 dark:text-white">User Reviews</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Testimonial 1 -->
-                <div class="border-b border-gray-800 pb-6">
-                    <p class="text-gray-400 mb-6 italic">
+                <div class="border-b-2 border-gray-300 dark:border-gray-700 pb-6">
+                    <p class="text-gray-700 dark:text-gray-300 mb-6 italic">
                         "CalendarPro has completely transformed how I manage my schedule. The intuitive interface and powerful features keep me organized and in control of all my tasks."
                     </p>
                     <div class="flex items-center">
-                        <div class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center mr-3">
+                        <div class="w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center mr-3">
                             <span class="font-medium">JD</span>
                         </div>
                         <div>
-                            <h4 class="font-light">Jane Doe</h4>
-                            <p class="text-xs text-gray-500">Student</p>
+                            <h4 class="font-medium text-gray-900 dark:text-white">Jane Doe</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Student</p>
                         </div>
                     </div>
                 </div>
                 <!-- Testimonial 2 -->
-                <div class="border-b border-gray-800 pb-6">
-                    <p class="text-gray-400 mb-6 italic">
+                <div class="border-b-2 border-gray-300 dark:border-gray-700 pb-6">
+                    <p class="text-gray-700 dark:text-gray-300 mb-6 italic">
                         "The daily schedule view is incredibly useful for planning my workday. I love how easy it is to add and edit tasks, and the minimalist design is perfect for extended use."
                     </p>
                     <div class="flex items-center">
-                        <div class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center mr-3">
+                        <div class="w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center mr-3">
                             <span class="font-medium">MS</span>
                         </div>
                         <div>
-                            <h4 class="font-light">Michael Smith</h4>
-                            <p class="text-xs text-gray-500">Professional</p>
+                            <h4 class="font-medium text-gray-900 dark:text-white">Michael Smith</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Professional</p>
                         </div>
                     </div>
                 </div>
                 <!-- Testimonial 3 -->
-                <div class="border-b border-gray-800 pb-6">
-                    <p class="text-gray-400 mb-6 italic">
+                <div class="border-b-2 border-gray-300 dark:border-gray-700 pb-6">
+                    <p class="text-gray-700 dark:text-gray-300 mb-6 italic">
                         "As a teacher, I use CalendarPro to track my classes, tutorials, and office hours. The deadline tracking feature helps me stay on top of grading and preparation."
                     </p>
                     <div class="flex items-center">
-                        <div class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center mr-3">
+                        <div class="w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center mr-3">
                             <span class="font-medium">AL</span>
                         </div>
                         <div>
-                            <h4 class="font-light">Amanda Lee</h4>
-                            <p class="text-xs text-gray-500">Teacher</p>
+                            <h4 class="font-medium text-gray-900 dark:text-white">Amanda Lee</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Teacher</p>
                         </div>
                     </div>
                 </div>
@@ -281,69 +281,69 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 bg-black transition-colors duration-300">
+    <section class="py-20 bg-white dark:bg-gray-900 transition-colors duration-300">
         <div class="container mx-auto px-4 text-center">
-            <h2 class="text-2xl font-light mb-6">Ready to Start Organizing Your Time?</h2>
-            <p class="text-gray-400 mb-8 max-w-2xl mx-auto">
+            <h2 class="text-2xl font-light mb-6 text-gray-900 dark:text-white">Ready to Start Organizing Your Time?</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
                 Start using CalendarPro now and take control of your schedule, tasks, and deadlines.
             </p>
-            <a href="calendar.html" class="bg-white text-black hover:bg-gray-200 font-light py-3 px-8 rounded-none transition-colors inline-block">
+            <a href="calendar.html" class="bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 font-medium py-3 px-8 rounded-lg transition-colors inline-block">
                 Start Using CalendarPro
             </a>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-black py-12 border-t border-gray-800">
+    <footer class="bg-gray-900 dark:bg-black py-12 border-t border-gray-700 dark:border-gray-800">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between">
                 <div class="mb-8 md:mb-0">
                     <div class="flex items-center space-x-2 mb-4">
-                        <div class="bg-white text-black p-1 rounded">
+                        <div class="bg-primary-600 text-white p-1 rounded">
                             <i class="fa fa-calendar" aria-hidden="true"></i>
                         </div>
-                        <span class="text-lg font-light">Calendar<span class="text-accent-500">Pro</span></span>
+                        <span class="text-lg font-medium text-white">Calendar<span class="text-primary-400">Pro</span></span>
                     </div>
-                    <p class="text-gray-500 max-w-xs">
+                    <p class="text-gray-400 max-w-xs">
                         A modern, intuitive calendar system to help you efficiently manage tasks, deadlines, and schedules.
                     </p>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
                     <div>
-                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">Quick Links</h3>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-400 mb-4">Quick Links</h3>
                         <ul class="space-y-2">
-                            <li><a href="index.html" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
-                            <li><a href="intro.html" class="text-gray-400 hover:text-white transition-colors">Introduction</a></li>
-                            <li><a href="calendar.html" class="text-gray-400 hover:text-white transition-colors">Calendar</a></li>
+                            <li><a href="index.html" class="text-gray-300 hover:text-white transition-colors">Home</a></li>
+                            <li><a href="intro.html" class="text-gray-300 hover:text-white transition-colors">Introduction</a></li>
+                            <li><a href="calendar.html" class="text-gray-300 hover:text-white transition-colors">Calendar</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">Features</h3>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-400 mb-4">Features</h3>
                         <ul class="space-y-2">
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Task Management</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Deadline Tracking</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Daily Schedule</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Task Management</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Deadline Tracking</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Daily Schedule</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h3 class="text-sm uppercase tracking-wider text-gray-500 mb-4">Contact Us</h3>
+                        <h3 class="text-sm uppercase tracking-wider text-gray-400 mb-4">Contact Us</h3>
                         <ul class="space-y-2">
                             <li class="flex items-center">
-                                <i class="fa fa-envelope-o mr-2 text-accent-500" aria-hidden="true"></i>
-                                <a href="mailto:info@calendarpro.com" class="text-gray-400 hover:text-white transition-colors">info@calendarpro.com</a>
+                                <i class="fa fa-envelope-o mr-2 text-primary-400" aria-hidden="true"></i>
+                                <a href="mailto:info@calendarpro.com" class="text-gray-300 hover:text-white transition-colors">info@calendarpro.com</a>
                             </li>
                             <li class="flex items-center">
-                                <i class="fa fa-phone mr-2 text-accent-500" aria-hidden="true"></i>
-                                <span class="text-gray-400">+1 (555) 123-4567</span>
+                                <i class="fa fa-phone mr-2 text-primary-400" aria-hidden="true"></i>
+                                <span class="text-gray-300">+1 (555) 123-4567</span>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-500 mb-4 md:mb-0">© 2025 CalendarPro. All rights reserved.</p>
+            <div class="border-t border-gray-700 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2025 CalendarPro. All rights reserved.</p>
                 <div class="flex space-x-4">
-                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
                         <i class="fa fa-facebook" aria-hidden="true"></i>
                     </a>
                     <a href="#" class="text-gray-500 hover:text-white transition-colors">
@@ -362,6 +362,29 @@
 
     <!-- JavaScript -->
     <script>
+        // Theme Toggle
+        function initTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            // Check for saved theme preference or use system preference
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                html.classList.add('dark');
+            }
+            
+            // Toggle theme on button click
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    html.classList.toggle('dark');
+                    const theme = html.classList.contains('dark') ? 'dark' : 'light';
+                    localStorage.setItem('theme', theme);
+                });
+            }
+        }
+        
         // Mobile Menu Toggle
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -472,6 +495,9 @@
 
         // Initialize effects when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialize theme
+            initTheme();
+            
             // Initialize typing effect
             typingEffect(
                 document.getElementById('typing-text'),

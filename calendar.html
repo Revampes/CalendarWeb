@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar Website - Calendar</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- Tailwind Config -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -25,7 +22,7 @@
                             600: '#4f46e5',
                             700: '#4338ca',
                             800: '#3730a3',
-                            900: '#312e81',
+                            900: '#312e81'
                         },
                         secondary: {
                             50: '#f0f9ff',
@@ -37,7 +34,7 @@
                             600: '#0284c7',
                             700: '#0369a1',
                             800: '#075985',
-                            900: '#0c4a6e',
+                            900: '#0c4a6e'
                         },
                         task: {
                             lecture: '#3b82f6',
@@ -51,219 +48,326 @@
                         }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-up': 'slideUp 0.5s ease-in-out',
-                        'pulse-slow': 'pulse 3s infinite',
+                        'fade-in': 'fadeIn 0.35s ease',
+                        'slide-up': 'slideUp 0.35s ease'
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 }
                         },
                         slideUp: {
-                            '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        },
-                    },
+                            '0%': { opacity: 0, transform: 'translateY(12px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' }
+                        }
+                    }
                 }
             }
-        }
+        };
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
             .text-shadow {
-                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                text-shadow: 0 2px 4px rgba(15, 23, 42, 0.1);
             }
+
             .bg-gradient-light {
                 background: linear-gradient(135deg, #e0f2fe 0%, #eef2ff 100%);
             }
+
             .bg-gradient-dark {
                 background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             }
+
             .scrollbar-thin {
                 scrollbar-width: thin;
             }
+
             .scrollbar-thin::-webkit-scrollbar {
                 width: 6px;
             }
+
+            .scrollbar-thin::-webkit-scrollbar-thumb {
+                background-color: rgba(148, 163, 184, 0.6);
+                border-radius: 3px;
+            }
+
             .scrollbar-thin::-webkit-scrollbar-track {
                 background: transparent;
             }
-            .scrollbar-thin::-webkit-scrollbar-thumb {
-                background-color: rgba(156, 163, 175, 0.5);
-                border-radius: 3px;
-            }
+
             .task-dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
+                width: 0.6rem;
+                height: 0.6rem;
+                border-radius: 9999px;
                 display: inline-block;
-                margin-right: 4px;
             }
-            .task-lecture { background-color: theme('colors.task.lecture'); }
-            .task-tutorial { background-color: theme('colors.task.tutorial'); }
-            .task-training { background-color: theme('colors.task.training'); }
-            .task-meeting { background-color: theme('colors.task.meeting'); }
-            .task-assignment { background-color: theme('colors.task.assignment'); }
-            .task-exam { background-color: theme('colors.task.exam'); }
-            .task-break { background-color: theme('colors.task.break'); }
-            .task-other { background-color: theme('colors.task.other'); }
+        }
+    </style>
+    <style>
+        .calendar-day-cell {
+            position: relative;
+            min-height: 96px;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: rgba(255, 255, 255, 0.85);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .calendar-day-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .dark .calendar-day-cell {
+            background: rgba(15, 23, 42, 0.65);
+            border-color: rgba(71, 85, 105, 0.55);
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            color: rgba(15, 23, 42, 0.82);
+        }
+
+        .dark .calendar-day-number {
+            color: rgba(226, 232, 240, 0.9);
+        }
+
+        .calendar-day-meta {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            width: 100%;
+        }
+
+        .deadline-marker {
+            position: absolute;
+            top: 14px;
+            bottom: 14px;
+            right: 6px;
+            width: 3px;
+            border-radius: 9999px;
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.65));
+        }
+
+        .task-card {
+            position: relative;
+            padding: 1rem;
+            border-radius: 0.9rem;
+            border: 1px solid rgba(var(--task-color, 99, 102, 241), 0.35);
+            background: linear-gradient(135deg, rgba(var(--task-color, 99, 102, 241), 0.18), rgba(var(--task-color, 99, 102, 241), 0.08));
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(var(--task-color, 99, 102, 241), 0.22);
+        }
+
+        .dark .task-card {
+            background: linear-gradient(135deg, rgba(var(--task-color, 99, 102, 241), 0.28), rgba(var(--task-color, 99, 102, 241), 0.12));
+            border-color: rgba(var(--task-color, 99, 102, 241), 0.5);
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 0.9rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(248, 250, 252, 0.8);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .todo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .dark .todo-item {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(71, 85, 105, 0.45);
+        }
+
+        .todo-item.completed {
+            opacity: 0.7;
+        }
+
+        .todo-item.completed .todo-title {
+            text-decoration: line-through;
+        }
+
+        .modal {
+            background-color: rgba(0, 0, 0, 0.55);
         }
     </style>
 </head>
-<body class="min-h-screen transition bg.bg-gray-50 dark:bg-gray-900 transition-colors duration-300" id="body-element">
-    <!-- Navigation -->
-    <nav class="bg-white dark:bg-gray-900 shadow-md shadow-md shadow-2.5 shadow-md transition-colors duration-300 sticky top-0 z-50">
+<body id="body-element" class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans">
+    <nav class="bg-white dark:bg-gray-900 shadow-md transition-colors duration-300">
         <div class="container mx-auto px-4 py-3">
-            <div class="flex justify-between items items-center">
-                <div class="flex items-center space-x-2">
-                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b5e1e873f23741a8b35ca632a3ca932f~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015245&x-signature=RKJB2ttdvlu0bEeRta72gb9uI9Q%3D" alt="Calendar Logo" class="h-10 w-10">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <img class="h-10 w-10 rounded-lg shadow-sm" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b5e1e873f23741a8b35ca632a3ca932f~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015245&x-signature=RKJB2ttdvlu0bEeRta72gb9uI9Q%3D" alt="Calendar Logo">
                     <span class="text-xl font-bold text-primary-600 dark:text-primary-400">CalendarPro</span>
                 </div>
-                <div class="hidden md:flex space-x-8">
-                    <a href="index.html" class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
-                    <a href="intro.html" class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Introduction</a>
-                    <a href="calendar.html" class="text-primary-600 dark:text-primary-400 font-medium hover:text-primary-800 dark:hover:text-primary-300 transition-colors">Calendar</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors" href="index.html">Home</a>
+                    <a class="text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors" href="intro.html">Introduction</a>
+                    <a class="text-primary-600 dark:text-primary-400 font-semibold" href="calendar.html">Calendar</a>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                        <i class="fa fa-moon-o dark:hidden text-gray-600" aria-hidden="true"></i>
-                        <i class="fa fa-sun-o hidden dark:block text-yellow-300" aria-hidden="true"></i>
+                <div class="flex items-center space-x-3">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" aria-label="Toggle theme">
+                        <i class="fa fa-moon-o text-gray-600 dark:hidden" aria-hidden="true"></i>
+                        <i class="fa fa-sun-o text-yellow-300 hidden dark:block" aria-hidden="true"></i>
                     </button>
-                    <button class="md:hidden" id="mobile-menu-button">
+                    <button id="mobile-menu-button" class="md:hidden" aria-label="Toggle navigation">
                         <i class="fa fa-bars text-gray-600 dark:text-gray-300" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
-            <!-- Mobile Menu -->
-            <div id="mobile-menu" class="md:hidden hidden pt-4 pb-2 animate-fade-in">
-                <a href="index.html" class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
-                <a href="intro.html" class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Introduction</a>
-                <a href="calendar.html" class="block py-2 text-primary-600 dark:text-primary-400 font-medium">Calendar</a>
+            <div id="mobile-menu" class="md:hidden hidden pt-4 space-y-2 animate-fade-in">
+                <a class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors" href="index.html">Home</a>
+                <a class="block py-2 text-gray-600 dark:text-gray-300 font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors" href="intro.html">Introduction</a>
+                <a class="block py-2 text-primary-600 dark:text-primary-400 font-semibold" href="calendar.html">Calendar</a>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Side - Calendar and Task Management -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Monthly Calendar -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-white" id="current-month">November 2025</h2>
-                        <div class="flex space-x-2">
-                            <button id="prev-month" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                <i class="fa fa-chevron-left text-gray-600 dark:text-gray-300" aria-hidden="true"></i>
-                            </button>
-                            <button id="today-btn" class="px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors">Today</button>
-                            <button id="next-month" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                <i class="fa fa-chevron-right text-gray-600 dark:text-gray-300" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Calendar Grid -->
-                    <div class="grid grid-cols-7 gap-1 mb-2">
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Sun</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Mon</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Tue</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Wed</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Thu</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Fri</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400">Sat</div>
-                    </div>
-                    <div class="grid grid-cols-7 gap-1" id="calendar-grid">
-                        <!-- Calendar days will be generated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- Add Task and Deadline Buttons -->
-                <div class="flex flex-wrap gap-4">
-                    <button id="add-task-btn" class="flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fa fa-plus-circle mr-2" aria-hidden="true"></i>Add Task
-                    </button>
-                    <button id="add-deadline-btn" class="flex items-center bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fa fa-calendar-times-o mr-2" aria-hidden="true"></i>Add Deadline
-                    </button>
-                </div>
-                
-                <!-- Task List -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Tasks for <span id="selected-date-display">Today</span></h2>
-                    <div id="tasks-container" class="space-y-3">
-                        <!-- Tasks will be generated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- Deadline List -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Deadlines</h2>
-                    <div id="deadlines-container" class="space-y-3">
-                        <!-- Deadlines will be generated by JavaScript -->
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Right Side - Daily Schedule and Today's Summary -->
-            <div class="space-y-6">
-                <!-- Daily Schedule -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Today's Schedule</h2>
-                    <div class="overflow-y-auto max-h-[500px] scrollbar-thin" id="daily-schedule">
-                        <!-- Daily schedule will be generated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- Today's Summary -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Today's Summary</h2>
-                    
-                    <!-- Today's Tasks -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Tasks</h3>
-                        <div id="today-tasks-container" class="space-y-2">
-                            <!-- Today's tasks will be generated by JavaScript -->
-                        </div>
-                    </div>
-                    
-                    <!-- Today's Deadlines -->
+    <main class="py-10">
+        <div class="container mx-auto px-4 space-y-8">
+            <section class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
                     <div>
-                        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Deadlines</h3>
-                        <div id="today-deadlines-container" class="space-y-2">
-                            <!-- Today's deadlines will be generated by JavaScript -->
-                        </div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Plan Your Schedule</h1>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Stay on top of classes, deadlines, and to-dos with a single glance.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button id="add-task-btn" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">
+                            <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+                            Add Schedule
+                        </button>
+                        <button id="add-deadline-btn" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors">
+                            <i class="fa fa-flag" aria-hidden="true"></i>
+                            Add Deadline
+                        </button>
+                        <button id="add-todo-btn" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors">
+                            <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                            Add To-Do
+                        </button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+                <div class="grid gap-6 mt-6 xl:grid-cols-[1.5fr,1fr]">
+                    <div class="space-y-6">
+                        <section class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <button id="prev-month" class="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" aria-label="Previous month">
+                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                    </button>
+                                    <h2 id="current-month" class="text-lg font-semibold"></h2>
+                                    <button id="next-month" class="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" aria-label="Next month">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <button id="today-btn" class="px-3 py-2 text-sm font-medium rounded-lg bg-secondary-100 text-secondary-700 hover:bg-secondary-200 dark:bg-secondary-900 dark:text-secondary-200 dark:hover:bg-secondary-800 transition-colors">Today</button>
+                            </div>
+                            <div class="mt-6 grid grid-cols-7 gap-2 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                <span>Sun</span>
+                                <span>Mon</span>
+                                <span>Tue</span>
+                                <span>Wed</span>
+                                <span>Thu</span>
+                                <span>Fri</span>
+                                <span>Sat</span>
+                            </div>
+                            <div id="calendar-grid" class="mt-2 grid grid-cols-7 gap-2"></div>
+                        </section>
 
-    <!-- Add Task Modal -->
-    <div id="add-task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+                        <section class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Schedule for <span id="selected-date-display">Today</span></h2>
+                            <div id="schedule-container" class="space-y-4"></div>
+                        </section>
+
+                        <section class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+                            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">To-Do for <span id="todo-date-display">Today</span></h2>
+                                <button id="clear-completed-btn" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                    Clear Completed
+                                </button>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <h3 class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Pending</h3>
+                                    <div id="todo-pending-container" class="space-y-2"></div>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Completed</h3>
+                                    <div id="todo-completed-container" class="space-y-2"></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Deadlines</h2>
+                            <div id="deadlines-container" class="space-y-4"></div>
+                        </section>
+                    </div>
+
+                    <div class="space-y-6">
+                        <section class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Today's Schedule</h2>
+                            <div id="daily-schedule" class="max-h-[520px] overflow-y-auto scrollbar-thin pr-2 space-y-3"></div>
+                        </section>
+
+                        <section class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Today's Summary</h2>
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Schedule</h3>
+                                    <div id="today-schedule-container" class="space-y-2"></div>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Deadlines</h3>
+                                    <div id="today-deadlines-container" class="space-y-2"></div>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">To-Do</h3>
+                                    <div id="today-todos-container" class="space-y-2"></div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Add Schedule Modal -->
+    <div id="add-task-modal" class="modal fixed inset-0 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md animate-fade-in">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New Task</h3>
-                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Add Schedule Item</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Close modal">
                     <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
             </div>
-            <form id="add-task-form">
+            <form id="add-task-form" class="space-y-4">
                 <input type="hidden" id="task-date" value="">
-                
-                <div class="mb-4">
-                    <label for="task-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Name</label>
-                    <input type="text" id="task-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                <div>
+                    <label for="task-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                    <input type="text" id="task-name" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Type</label>
-                        <select id="task-type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <label for="task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                        <select id="task-type" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                             <option value="lecture">Lecture</option>
                             <option value="tutorial">Tutorial</option>
                             <option value="training">Training</option>
@@ -276,111 +380,130 @@
                     </div>
                     <div>
                         <label for="task-date-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                        <input type="date" id="task-date-input" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="date" id="task-date-input" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                     </div>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="start-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
-                        <input type="time" id="start-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="time" id="start-time" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                     </div>
                     <div>
                         <label for="end-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
-                        <input type="time" id="end-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="time" id="end-time" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                     </div>
                 </div>
-                
-                <div class="mb-4">
+                <div>
                     <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-                    <input type="text" id="location" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    <input type="text" id="location" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
                 </div>
-                
-                <div class="mb-4">
+                <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                    <textarea id="description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                    <textarea id="description" rows="3" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
                 </div>
-                
-                <div class="mb-4">
-                    <label for="link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
-                    <input type="url" id="link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                <div>
+                    <label for="link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (optional)</label>
+                    <input type="url" id="link" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
                 </div>
-                
-                <div class="flex justify-end">
-                    <button type="button" class="close-modal bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-                    <button type="submit" class="bg-primary-600 text-white font-medium py-2 px-4 rounded-md hover:bg-primary-700 transition-colors">Add Task</button>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="close-modal px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors">Add Schedule</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Add Deadline Modal -->
-    <div id="add-deadline-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+    <div id="add-deadline-modal" class="modal fixed inset-0 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md animate-fade-in">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New Deadline</h3>
-                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Add Deadline</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Close modal">
                     <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
             </div>
-            <form id="add-deadline-form">
+            <form id="add-deadline-form" class="space-y-4">
                 <input type="hidden" id="deadline-date" value="">
-                
-                <div class="mb-4">
-                    <label for="deadline-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline Name</label>
-                    <input type="text" id="deadline-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                <div>
+                    <label for="deadline-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                    <input type="text" id="deadline-name" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500" required>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="deadline-date-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                        <input type="date" id="deadline-date-input" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="date" id="deadline-date-input" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500" required>
                     </div>
                     <div>
                         <label for="deadline-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
-                        <input type="time" id="deadline-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="time" id="deadline-time" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500" required>
                     </div>
                 </div>
-                
-                <div class="mb-4">
+                <div>
                     <label for="deadline-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                    <textarea id="deadline-description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                    <textarea id="deadline-description" rows="3" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500"></textarea>
                 </div>
-                
-                <div class="mb-4">
-                    <label for="deadline-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
-                    <input type="url" id="deadline-link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                <div>
+                    <label for="deadline-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (optional)</label>
+                    <input type="url" id="deadline-link" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500">
                 </div>
-                
-                <div class="flex justify-end">
-                    <button type="button" class="close-modal bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-                    <button type="submit" class="bg-red-600 text-white font-medium py-2 px-4 rounded-md hover:bg-red-700 transition-colors">Add Deadline</button>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="close-modal px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors">Add Deadline</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Edit Task Modal -->
-    <div id="edit-task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+    <!-- Add To-Do Modal -->
+    <div id="add-todo-modal" class="modal fixed inset-0 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md animate-fade-in">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Edit Task</h3>
-                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Add To-Do</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Close modal">
                     <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
             </div>
-            <form id="edit-task-form">
-                <input type="hidden" id="edit-task-id" value="">
-                
-                <div class="mb-4">
-                    <label for="edit-task-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Name</label>
-                    <input type="text" id="edit-task-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+            <form id="add-todo-form" class="space-y-4">
+                <input type="hidden" id="todo-date" value="">
+                <div>
+                    <label for="todo-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                    <input type="text" id="todo-title" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500" required>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="todo-notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (optional)</label>
+                    <textarea id="todo-notes" rows="3" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"></textarea>
+                </div>
+                <div>
+                    <label for="todo-date-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                    <input type="date" id="todo-date-input" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500" required>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="close-modal px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors">Add To-Do</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Schedule Modal -->
+    <div id="edit-task-modal" class="modal fixed inset-0 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Edit Schedule Item</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Close modal">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form id="edit-task-form" class="space-y-4">
+                <input type="hidden" id="edit-task-id" value="">
+                <div>
+                    <label for="edit-task-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                    <input type="text" id="edit-task-name" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="edit-task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Type</label>
-                        <select id="edit-task-type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <label for="edit-task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                        <select id="edit-task-type" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                             <option value="lecture">Lecture</option>
                             <option value="tutorial">Tutorial</option>
                             <option value="training">Training</option>
@@ -393,975 +516,1087 @@
                     </div>
                     <div>
                         <label for="edit-task-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                        <input type="date" id="edit-task-date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="date" id="edit-task-date" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                     </div>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="edit-start-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
-                        <input type="time" id="edit-start-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="time" id="edit-start-time" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                     </div>
                     <div>
                         <label for="edit-end-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
-                        <input type="time" id="edit-end-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="time" id="edit-end-time" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                     </div>
                 </div>
-                
-                <div class="mb-4">
+                <div>
                     <label for="edit-location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-                    <input type="text" id="edit-location" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    <input type="text" id="edit-location" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
                 </div>
-                
-                <div class="mb-4">
+                <div>
                     <label for="edit-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                    <textarea id="edit-description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                    <textarea id="edit-description" rows="3" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
                 </div>
-                
-                <div class="mb-4">
-                    <label for="edit-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
-                    <input type="url" id="edit-link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                <div>
+                    <label for="edit-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (optional)</label>
+                    <input type="url" id="edit-link" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
                 </div>
-                
-                <div class="flex justify-end">
-                    <button type="button" id="delete-task-btn" class="bg-red-600 text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-red-700 transition-colors">Delete</button>
-                    <button type="button" class="close-modal bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-                    <button type="submit" class="bg-primary-600 text-white font-medium py-2 px-4 rounded-md hover:bg-primary-700 transition-colors">Save Changes</button>
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="delete-task-btn" class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors">Delete</button>
+                    <button type="button" class="close-modal px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Edit Deadline Modal -->
-    <div id="edit-deadline-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+    <div id="edit-deadline-modal" class="modal fixed inset-0 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md animate-fade-in">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Edit Deadline</h3>
-                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Edit Deadline</h3>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Close modal">
                     <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
             </div>
-            <form id="edit-deadline-form">
+            <form id="edit-deadline-form" class="space-y-4">
                 <input type="hidden" id="edit-deadline-id" value="">
-                
-                <div class="mb-4">
-                    <label for="edit-deadline-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline Name</label>
-                    <input type="text" id="edit-deadline-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                <div>
+                    <label for="edit-deadline-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                    <input type="text" id="edit-deadline-name" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500" required>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="edit-deadline-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                        <input type="date" id="edit-deadline-date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="date" id="edit-deadline-date" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500" required>
                     </div>
                     <div>
                         <label for="edit-deadline-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
-                        <input type="time" id="edit-deadline-time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" required>
+                        <input type="time" id="edit-deadline-time" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500" required>
                     </div>
                 </div>
-                
-                <div class="mb-4">
+                <div>
                     <label for="edit-deadline-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                    <textarea id="edit-deadline-description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                    <textarea id="edit-deadline-description" rows="3" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500"></textarea>
                 </div>
-                
-                <div class="mb-4">
-                    <label for="edit-deadline-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (Optional)</label>
-                    <input type="url" id="edit-deadline-link" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                <div>
+                    <label for="edit-deadline-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link (optional)</label>
+                    <input type="url" id="edit-deadline-link" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-red-500 focus:border-red-500">
                 </div>
-                
-                <div class="flex justify-end">
-                    <button type="button" id="delete-deadline-btn" class="bg-red-600 text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-red-700 transition-colors">Delete</button>
-                    <button type="button" class="close-modal bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md mr-2 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-                    <button type="submit" class="bg-red-600 text-white font-medium py-2 px-4 rounded-md hover:bg-red-700 transition-colors">Save Changes</button>
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="delete-deadline-btn" class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors">Delete</button>
+                    <button type="button" class="close-modal px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- JavaScript -->
     <script>
-        // Theme Toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        const bodyElement = document.getElementById('body-element');
-        
-        // Check for saved theme preference or use system preference
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            bodyElement.classList.add('dark');
-        } else {
-            bodyElement.classList.remove('dark');
-        }
-        
-        // Toggle theme
-        themeToggle.addEventListener('click', () => {
-            bodyElement.classList.toggle('dark');
-            
-            // Save preference to localStorage
-            if (bodyElement.classList.contains('dark')) {
-                localStorage.theme = 'dark';
-            } else {
-                localStorage.theme = 'light';
-            }
-        });
-        
-        // Mobile Menu Toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-        
-        // Calendar Functionality
+        const STORAGE_KEYS = {
+            schedules: 'calendar_schedules',
+            deadlines: 'calendar_deadlines',
+            todos: 'calendar_todos',
+            legacyTasks: 'tasks'
+        };
+
+        const TASK_TYPE_COLORS = {
+            lecture: '#3b82f6',
+            tutorial: '#10b981',
+            training: '#f59e0b',
+            meeting: '#8b5cf6',
+            assignment: '#ef4444',
+            exam: '#ec4899',
+            break: '#6366f1',
+            other: '#6b7280'
+        };
+
+        const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize data storage
-            if (!localStorage.getItem('tasks')) {
-                localStorage.setItem('tasks', JSON.stringify([]));
-            }
-            
-            if (!localStorage.getItem('deadlines')) {
-                localStorage.setItem('deadlines', JSON.stringify([]));
-            }
-            
-            // Sample data for demonstration
-            const sampleTasks = [
-                {
-                    id: generateId(),
-                    name: 'Introduction to Computer Science',
-                    type: 'lecture',
-                    date: '2025-11-23',
-                    startTime: '09:00',
-                    endTime: '11:00',
-                    location: 'Main Hall, Building A',
-                    description: 'First lecture of the semester covering basic concepts',
-                    link: 'https://example.com/lecture1'
-                },
-                {
-                    id: generateId(),
-                    name: 'Programming Basics Tutorial',
-                    type: 'tutorial',
-                    date: '2025-11-23',
-                    startTime: '12:00',
-                    endTime: '14:00',
-                    location: 'Computer Lab, Building B',
-                    description: 'Hands-on session for programming fundamentals',
-                    link: 'https://example.com/tutorial1'
-                },
-                {
-                    id: generateId(),
-                    name: 'Project Discussion Meeting',
-                    type: 'meeting',
-                    date: '2025-11-23',
-                    startTime: '15:00',
-                    endTime: '16:00',
-                    location: 'Conference Room, Building C',
-                    description: 'Group discussion for the upcoming project',
-                    link: 'https://example.com/project1'
-                },
-                {
-                    id: generateId(),
-                    name: 'Data Structures Lecture',
-                    type: 'lecture',
-                    date: '2025-11-24',
-                    startTime: '10:00',
-                    endTime: '12:00',
-                    location: 'Main Hall, Building A',
-                    description: 'Lecture on arrays, linked lists, and trees',
-                    link: 'https://example.com/lecture2'
+            const state = {
+                today: normaliseDate(new Date()),
+                current: normaliseDate(new Date()),
+                selected: normaliseDate(new Date())
+            };
+
+            const elements = {
+                body: document.getElementById('body-element'),
+                themeToggle: document.getElementById('theme-toggle'),
+                mobileMenuButton: document.getElementById('mobile-menu-button'),
+                mobileMenu: document.getElementById('mobile-menu'),
+                prevMonth: document.getElementById('prev-month'),
+                nextMonth: document.getElementById('next-month'),
+                todayButton: document.getElementById('today-btn'),
+                currentMonthLabel: document.getElementById('current-month'),
+                calendarGrid: document.getElementById('calendar-grid'),
+                selectedDateDisplay: document.getElementById('selected-date-display'),
+                todoDateDisplay: document.getElementById('todo-date-display'),
+                scheduleContainer: document.getElementById('schedule-container'),
+                deadlinesContainer: document.getElementById('deadlines-container'),
+                todoPendingContainer: document.getElementById('todo-pending-container'),
+                todoCompletedContainer: document.getElementById('todo-completed-container'),
+                dailySchedule: document.getElementById('daily-schedule'),
+                todayScheduleContainer: document.getElementById('today-schedule-container'),
+                todayDeadlinesContainer: document.getElementById('today-deadlines-container'),
+                todayTodosContainer: document.getElementById('today-todos-container'),
+                addTaskModal: document.getElementById('add-task-modal'),
+                addDeadlineModal: document.getElementById('add-deadline-modal'),
+                addTodoModal: document.getElementById('add-todo-modal'),
+                editTaskModal: document.getElementById('edit-task-modal'),
+                editDeadlineModal: document.getElementById('edit-deadline-modal'),
+                addTaskForm: document.getElementById('add-task-form'),
+                addDeadlineForm: document.getElementById('add-deadline-form'),
+                addTodoForm: document.getElementById('add-todo-form'),
+                editTaskForm: document.getElementById('edit-task-form'),
+                editDeadlineForm: document.getElementById('edit-deadline-form'),
+                clearCompletedButton: document.getElementById('clear-completed-btn'),
+                addTaskButton: document.getElementById('add-task-btn'),
+                addDeadlineButton: document.getElementById('add-deadline-btn'),
+                addTodoButton: document.getElementById('add-todo-btn'),
+                deleteTaskButton: document.getElementById('delete-task-btn'),
+                deleteDeadlineButton: document.getElementById('delete-deadline-btn'),
+                closeButtons: document.querySelectorAll('.close-modal'),
+                modalContainers: document.querySelectorAll('.modal')
+            };
+
+            initialiseTheme(elements.body, elements.themeToggle);
+            initialiseNavigation(elements.mobileMenuButton, elements.mobileMenu);
+            ensureSeedData();
+
+            elements.prevMonth.addEventListener('click', () => {
+                const updated = new Date(state.current.getFullYear(), state.current.getMonth() - 1, 1);
+                state.current = normaliseDate(updated);
+                renderAll();
+            });
+
+            elements.nextMonth.addEventListener('click', () => {
+                const updated = new Date(state.current.getFullYear(), state.current.getMonth() + 1, 1);
+                state.current = normaliseDate(updated);
+                renderAll();
+            });
+
+            elements.todayButton.addEventListener('click', () => {
+                state.current = normaliseDate(new Date());
+                state.selected = normaliseDate(new Date());
+                renderAll();
+            });
+
+            elements.addTaskButton.addEventListener('click', () => openAddModal('schedule'));
+            elements.addDeadlineButton.addEventListener('click', () => openAddModal('deadline'));
+            elements.addTodoButton.addEventListener('click', () => openAddModal('todo'));
+
+            elements.addTaskForm.addEventListener('submit', handleAddSchedule);
+            elements.addDeadlineForm.addEventListener('submit', handleAddDeadline);
+            elements.addTodoForm.addEventListener('submit', handleAddTodo);
+
+            elements.editTaskForm.addEventListener('submit', handleEditSchedule);
+            elements.editDeadlineForm.addEventListener('submit', handleEditDeadline);
+
+            elements.deleteTaskButton.addEventListener('click', handleDeleteSchedule);
+            elements.deleteDeadlineButton.addEventListener('click', handleDeleteDeadline);
+
+            elements.clearCompletedButton.addEventListener('click', () => {
+                const todos = getTodos().filter(todo => !todo.completed);
+                saveItems(STORAGE_KEYS.todos, todos);
+                renderAll();
+            });
+
+            elements.closeButtons.forEach(button => {
+                button.addEventListener('click', () => closeAllModals());
+            });
+
+            elements.modalContainers.forEach(container => {
+                container.addEventListener('click', event => {
+                    if (event.target === container) {
+                        closeAllModals();
+                    }
+                });
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    closeAllModals();
                 }
-            ];
-            
-            const sampleDeadlines = [
-                {
-                    id: generateId(),
-                    name: 'Data Structures Assignment',
-                    date: '2025-11-23',
-                    time: '23:59',
-                    description: 'Complete the assignment on linked lists',
-                    link: 'https://example.com/assignment1'
-                },
-                {
-                    id: generateId(),
-                    name: 'Midterm Exam Registration',
-                    date: '2025-11-25',
-                    time: '18:00',
-                    description: 'Last day to register for midterm exams',
-                    link: 'https://example.com/registration'
-                }
-            ];
-            
-            // Only add sample data if there are no existing tasks or deadlines
-            const tasks = JSON.parse(localStorage.getItem('tasks'));
-            const deadlines = JSON.parse(localStorage.getItem('deadlines'));
-            
-            if (tasks.length === 0) {
-                localStorage.setItem('tasks', JSON.stringify(sampleTasks));
+            });
+
+            renderAll();
+
+            function renderAll() {
+                renderCalendar();
+                renderScheduleList();
+                renderDeadlinesList();
+                renderTodosList();
+                renderDailySchedule();
+                renderTodaySummary();
             }
-            
-            if (deadlines.length === 0) {
-                localStorage.setItem('deadlines', JSON.stringify(sampleDeadlines));
-            }
-            
-            // Calendar variables
-            const calendarGrid = document.getElementById('calendar-grid');
-            const currentMonthElement = document.getElementById('current-month');
-            const prevMonthButton = document.getElementById('prev-month');
-            const nextMonthButton = document.getElementById('next-month');
-            const todayButton = document.getElementById('today-btn');
-            const selectedDateDisplay = document.getElementById('selected-date-display');
-            
-            let currentDate = new Date();
-            let selectedDate = new Date();
-            
-            // Modal variables
-            const addTaskModal = document.getElementById('add-task-modal');
-            const addDeadlineModal = document.getElementById('add-deadline-modal');
-            const editTaskModal = document.getElementById('edit-task-modal');
-            const editDeadlineModal = document.getElementById('edit-deadline-modal');
-            
-            const addTaskButton = document.getElementById('add-task-btn');
-            const addDeadlineButton = document.getElementById('add-deadline-btn');
-            
-            const closeModalButtons = document.querySelectorAll('.close-modal');
-            
-            // Form variables
-            const addTaskForm = document.getElementById('add-task-form');
-            const addDeadlineForm = document.getElementById('add-deadline-form');
-            const editTaskForm = document.getElementById('edit-task-form');
-            const editDeadlineForm = document.getElementById('edit-deadline-form');
-            
-            const deleteTaskButton = document.getElementById('delete-task-btn');
-            const deleteDeadlineButton = document.getElementById('delete-deadline-btn');
-            
-            // Render calendar
-            function renderCalendar(year, month) {
-                // Clear previous calendar
-                calendarGrid.innerHTML = '';
-                
-                // Update current month display
-                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                currentMonthElement.textContent = `${monthNames[month]} ${year}`;
-                
-                // Get first day of the month
-                const firstDay = new Date(year, month, 1);
-                const lastDay = new Date(year, month + 1, 0);
-                
-                // Get number of days in the month
-                const daysInMonth = lastDay.getDate();
-                
-                // Get day of the week for the first day (0 = Sunday, 6 = Saturday)
-                const firstDayOfWeek = firstDay.getDay();
-                
-                // Create empty cells for days before the first day of the month
-                for (let i = 0; i < firstDayOfWeek; i++) {
-                    const emptyCell = document.createElement('div');
-                    emptyCell.className = 'h-16 flex flex-col items-center justify-start p-1 text-gray-400 dark:text-gray-500';
-                    calendarGrid.appendChild(emptyCell);
+
+            function renderCalendar() {
+                const year = state.current.getFullYear();
+                const month = state.current.getMonth();
+
+                elements.currentMonthLabel.textContent = `${MONTH_NAMES[month]} ${year}`;
+                elements.calendarGrid.innerHTML = '';
+
+                const firstDayOfWeek = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+                for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                    const date = new Date(year, month - 1, daysInPrevMonth - i);
+                    elements.calendarGrid.appendChild(createDayCell(date, true));
                 }
-                
-                // Get tasks and deadlines
-                const tasks = JSON.parse(localStorage.getItem('tasks'));
-                const deadlines = JSON.parse(localStorage.getItem('deadlines'));
-                
-                // Create cells for each day of the month
+
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const dayCell = document.createElement('div');
-                    dayCell.className = 'h-16 flex flex-col items-center justify-start p-1 border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer';
-                    
-                    // Check if this is the current day
-                    const isCurrentDay = day === currentDate.getDate() && month === currentDate.getMonth() && year === currentDate.getFullYear();
-                    
-                    // Check if this is the selected day
-                    const isSelectedDay = day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear();
-                    
-                    // Add appropriate classes
-                    if (isSelectedDay) {
-                        dayCell.classList.add('bg-primary-100', 'dark:bg-primary-900');
-                    }
-                    
-                    if (isCurrentDay) {
-                        dayCell.classList.add('ring-2', 'ring-primary-500', 'dark:ring-primary-400');
-                    }
-                    
-                    // Create day number element
-                    const dayNumber = document.createElement('div');
-                    dayNumber.className = 'text-sm font-medium';
-                    dayNumber.textContent = day;
-                    
-                    // Add day number to cell
-                    dayCell.appendChild(dayNumber);
-                    
-                    // Get tasks and deadlines for this day
-                    const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const dayTasks = tasks.filter(task => task.date === dateString);
-                    const dayDeadlines = deadlines.filter(deadline => deadline.date === dateString);
-                    
-                    // Create indicators container
-                    const indicatorsContainer = document.createElement('div');
-                    indicatorsContainer.className = 'flex flex-wrap gap-1 mt-1 w-full';
-                    
-                    // Add task indicators
-                    dayTasks.slice(0, 2).forEach(task => {
-                        const taskIndicator = document.createElement('div');
-                        taskIndicator.className = `task-dot task-${task.type}`;
-                        indicatorsContainer.appendChild(taskIndicator);
-                    });
-                    
-                    // Add deadline indicators
-                    dayDeadlines.slice(0, 2).forEach(() => {
-                        const deadlineIndicator = document.createElement('div');
-                        deadlineIndicator.className = 'task-dot task-assignment';
-                        indicatorsContainer.appendChild(deadlineIndicator);
-                    });
-                    
-                    // Add more indicator if there are more than 2 tasks or deadlines
-                    const totalIndicators = dayTasks.length + dayDeadlines.length;
-                    if (totalIndicators > 4) {
-                        const moreIndicator = document.createElement('div');
-                        moreIndicator.className = 'text-xs text-gray-500 dark:text-gray-400';
-                        moreIndicator.textContent = `+${totalIndicators - 4}`;
-                        indicatorsContainer.appendChild(moreIndicator);
-                    }
-                    
-                    // Add indicators to cell
-                    dayCell.appendChild(indicatorsContainer);
-                    
-                    // Add click event to select date
-                    dayCell.addEventListener('click', () => {
-                        selectedDate = new Date(year, month, day);
-                        selectedDateDisplay.textContent = formatDate(selectedDate);
-                        renderCalendar(year, month);
-                        renderTasks();
-                        renderDeadlines();
-                        renderDailySchedule();
-                        renderTodaySummary();
-                    });
-                    
-                    // Add day cell to calendar grid
-                    calendarGrid.appendChild(dayCell);
+                    const date = new Date(year, month, day);
+                    elements.calendarGrid.appendChild(createDayCell(date, false));
+                }
+
+                const totalCells = elements.calendarGrid.children.length;
+                const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+                for (let day = 1; day <= remainingCells; day++) {
+                    const date = new Date(year, month + 1, day);
+                    elements.calendarGrid.appendChild(createDayCell(date, true));
                 }
             }
-            
-            // Render tasks for selected date
-            function renderTasks() {
-                const tasksContainer = document.getElementById('tasks-container');
-                tasksContainer.innerHTML = '';
-                
-                const dateString = formatDateForStorage(selectedDate);
-                const tasks = JSON.parse(localStorage.getItem('tasks')).filter(task => task.date === dateString);
-                
-                if (tasks.length === 0) {
-                    const noTasksMessage = document.createElement('div');
-                    noTasksMessage.className = 'text-gray-500 dark:text-gray-400 text-center py-4';
-                    noTasksMessage.textContent = 'No tasks scheduled for this day';
-                    tasksContainer.appendChild(noTasksMessage);
+
+            function createDayCell(date, isOtherMonth) {
+                const dateKey = formatDateForStorage(date);
+                const schedules = getSchedules().filter(schedule => schedule.date === dateKey);
+                const deadlines = getDeadlines().filter(deadline => deadline.date === dateKey);
+
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day-cell px-2 py-2 flex flex-col items-start gap-1 hover:cursor-pointer';
+
+                if (isOtherMonth) {
+                    cell.classList.add('opacity-60');
+                }
+
+                if (isSameDay(date, state.selected)) {
+                    cell.classList.add('ring-2', 'ring-primary-500', 'dark:ring-primary-400');
+                }
+
+                if (!isOtherMonth && isSameDay(date, state.today)) {
+                    cell.classList.add('border-primary-500', 'dark:border-primary-400');
+                }
+
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'calendar-day-number text-sm';
+                dayNumber.textContent = date.getDate();
+                cell.appendChild(dayNumber);
+
+                if (deadlines.length > 0) {
+                    const marker = document.createElement('div');
+                    marker.className = 'deadline-marker';
+                    marker.title = `${deadlines.length} deadline${deadlines.length > 1 ? 's' : ''}`;
+                    cell.appendChild(marker);
+                }
+
+                if (schedules.length > 0 || deadlines.length > 0) {
+                    const indicators = document.createElement('div');
+                    indicators.className = 'calendar-day-meta';
+
+                    schedules.slice(0, 3).forEach(schedule => {
+                        const dot = document.createElement('span');
+                        dot.className = 'task-dot';
+                        dot.style.backgroundColor = TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
+                        indicators.appendChild(dot);
+                    });
+
+                    deadlines.slice(0, 2).forEach(() => {
+                        const dot = document.createElement('span');
+                        dot.className = 'task-dot';
+                        dot.style.backgroundColor = TASK_TYPE_COLORS.assignment;
+                        indicators.appendChild(dot);
+                    });
+
+                    const totalItems = schedules.length + deadlines.length;
+                    if (totalItems > 5) {
+                        const more = document.createElement('span');
+                        more.className = 'text-xs text-gray-500 dark:text-gray-400';
+                        more.textContent = `+${totalItems - 5}`;
+                        indicators.appendChild(more);
+                    }
+
+                    cell.appendChild(indicators);
+                }
+
+                cell.addEventListener('click', () => {
+                    state.selected = normaliseDate(date);
+                    renderAll();
+                });
+
+                return cell;
+            }
+
+            function renderScheduleList() {
+                const dateKey = formatDateForStorage(state.selected);
+                const schedules = getSchedules().filter(schedule => schedule.date === dateKey).sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+                elements.selectedDateDisplay.textContent = isSameDay(state.selected, state.today) ? 'Today' : formatReadableDate(state.selected);
+                elements.scheduleContainer.innerHTML = '';
+
+                if (schedules.length === 0) {
+                    elements.scheduleContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400 text-center py-6">No schedule items for this day</div>';
                     return;
                 }
-                
-                // Sort tasks by start time
-                tasks.sort((a, b) => {
-                    if (a.startTime < b.startTime) return -1;
-                    if (a.startTime > b.startTime) return 1;
-                    return 0;
-                });
-                
-                tasks.forEach(task => {
-                    const taskElement = document.createElement('div');
-                    taskElement.className = `bg-${task.type}-50 dark:bg-${task.type}-900/30 p-3 rounded-md border border-${task.type}-100 dark:border-${task.type}-800 hover:shadow-md transition-shadow cursor-pointer`;
-                    
-                    const taskHeader = document.createElement('div');
-                    taskHeader.className = 'flex justify-between items-center';
-                    
-                    const taskTitle = document.createElement('div');
-                    taskTitle.className = `font-medium text-${task.type}-700 dark:text-${task.type}-300 flex items-center`;
-                    
-                    const taskDot = document.createElement('span');
-                    taskDot.className = `task-dot task-${task.type}`;
-                    
-                    const taskName = document.createElement('span');
-                    taskName.textContent = task.name;
-                    
-                    taskTitle.appendChild(taskDot);
-                    taskTitle.appendChild(taskName);
-                    
-                    const taskTime = document.createElement('span');
-                    taskTime.className = `text-sm text-${task.type}-600 dark:text-${task.type}-400`;
-                    taskTime.textContent = `${task.startTime} - ${task.endTime}`;
-                    
-                    taskHeader.appendChild(taskTitle);
-                    taskHeader.appendChild(taskTime);
-                    
-                    const taskLocation = document.createElement('p');
-                    taskLocation.className = 'text-sm text-gray-600 dark:text-gray-300 mt-1';
-                    taskLocation.textContent = task.location || 'No location specified';
-                    
-                    taskElement.appendChild(taskHeader);
-                    taskElement.appendChild(taskLocation);
-                    
-                    // Add click event to edit task
-                    taskElement.addEventListener('click', () => {
-                        openEditTaskModal(task);
-                    });
-                    
-                    tasksContainer.appendChild(taskElement);
+
+                schedules.forEach(schedule => {
+                    const card = document.createElement('div');
+                    card.className = 'task-card';
+                    const rgb = hexToRgb(TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other);
+                    card.style.setProperty('--task-color', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+
+                    const header = document.createElement('div');
+                    header.className = 'flex items-start justify-between gap-3';
+
+                    const title = document.createElement('div');
+                    title.className = 'flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100';
+
+                    const dot = document.createElement('span');
+                    dot.className = 'task-dot';
+                    dot.style.backgroundColor = TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
+
+                    const name = document.createElement('span');
+                    name.textContent = schedule.name;
+
+                    title.appendChild(dot);
+                    title.appendChild(name);
+
+                    const time = document.createElement('div');
+                    time.className = 'text-sm font-medium text-gray-600 dark:text-gray-300';
+                    time.textContent = `${schedule.startTime} - ${schedule.endTime}`;
+
+                    header.appendChild(title);
+                    header.appendChild(time);
+                    card.appendChild(header);
+
+                    if (schedule.location) {
+                        const location = document.createElement('div');
+                        location.className = 'text-sm text-gray-600 dark:text-gray-300 mt-2';
+                        location.textContent = schedule.location;
+                        card.appendChild(location);
+                    }
+
+                    if (schedule.description) {
+                        const description = document.createElement('div');
+                        description.className = 'text-xs text-gray-500 dark:text-gray-400 mt-2';
+                        description.textContent = schedule.description;
+                        card.appendChild(description);
+                    }
+
+                    if (schedule.link) {
+                        const link = document.createElement('a');
+                        link.className = 'text-sm text-primary-600 dark:text-primary-400 mt-3 inline-flex items-center gap-2';
+                        link.href = schedule.link;
+                        link.target = '_blank';
+                        link.rel = 'noopener';
+                        link.innerHTML = '<i class="fa fa-external-link" aria-hidden="true"></i>Open resource';
+                        card.appendChild(link);
+                    }
+
+                    card.addEventListener('click', () => openEditSchedule(schedule));
+                    elements.scheduleContainer.appendChild(card);
                 });
             }
-            
-            // Render deadlines
-            function renderDeadlines() {
-                const deadlinesContainer = document.getElementById('deadlines-container');
-                deadlinesContainer.innerHTML = '';
-                
-                const deadlines = JSON.parse(localStorage.getItem('deadlines'));
-                
-                // Sort deadlines by date and time
-                deadlines.sort((a, b) => {
-                    if (a.date < b.date) return -1;
-                    if (a.date > b.date) return 1;
-                    if (a.time < b.time) return -1;
-                    if (a.time > b.time) return 1;
-                    return 0;
+
+            function renderDeadlinesList() {
+                const deadlines = getDeadlines().slice().sort((a, b) => {
+                    if (a.date !== b.date) {
+                        return a.date.localeCompare(b.date);
+                    }
+                    return a.time.localeCompare(b.time);
                 });
-                
+
+                elements.deadlinesContainer.innerHTML = '';
+
                 if (deadlines.length === 0) {
-                    const noDeadlinesMessage = document.createElement('div');
-                    noDeadlinesMessage.className = 'text-gray-500 dark:text-gray-400 text-center py-4';
-                    noDeadlinesMessage.textContent = 'No deadlines scheduled';
-                    deadlinesContainer.appendChild(noDeadlinesMessage);
+                    elements.deadlinesContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400 text-center py-6">No deadlines scheduled</div>';
                     return;
                 }
-                
+
                 deadlines.forEach(deadline => {
-                    const deadlineElement = document.createElement('div');
-                    deadlineElement.className = 'bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800 hover:shadow-md transition-shadow cursor-pointer';
-                    
-                    const deadlineHeader = document.createElement('div');
-                    deadlineHeader.className = 'flex justify-between items-center';
-                    
-                    const deadlineTitle = document.createElement('div');
-                    deadlineTitle.className = 'font-medium text-red-700 dark:text-red-300 flex items-center';
-                    
-                    const deadlineDot = document.createElement('span');
-                    deadlineDot.className = 'task-dot task-assignment';
-                    
-                    const deadlineName = document.createElement('span');
-                    deadlineName.textContent = deadline.name;
-                    
-                    deadlineTitle.appendChild(deadlineDot);
-                    deadlineTitle.appendChild(deadlineName);
-                    
-                    const deadlineDateTime = document.createElement('span');
-                    deadlineDateTime.className = 'text-sm text-red-600 dark:text-red-400';
-                    
-                    const deadlineDate = new Date(deadline.date);
-                    deadlineDateTime.textContent = `${formatDate(deadlineDate)} ${deadline.time}`;
-                    
-                    deadlineHeader.appendChild(deadlineTitle);
-                    deadlineHeader.appendChild(deadlineDateTime);
-                    
-                    const deadlineDescription = document.createElement('p');
-                    deadlineDescription.className = 'text-sm text-gray-600 dark:text-gray-300 mt-1';
-                    deadlineDescription.textContent = deadline.description || 'No description provided';
-                    
-                    deadlineElement.appendChild(deadlineHeader);
-                    deadlineElement.appendChild(deadlineDescription);
-                    
-                    // Add click event to edit deadline
-                    deadlineElement.addEventListener('click', () => {
-                        openEditDeadlineModal(deadline);
-                    });
-                    
-                    deadlinesContainer.appendChild(deadlineElement);
-                });
-            }
-            
-            // Render daily schedule
-            function renderDailySchedule() {
-                const dailyScheduleContainer = document.getElementById('daily-schedule');
-                dailyScheduleContainer.innerHTML = '';
-                
-                const dateString = formatDateForStorage(selectedDate);
-                const tasks = JSON.parse(localStorage.getItem('tasks')).filter(task => task.date === dateString);
-                
-                // Sort tasks by start time
-                tasks.sort((a, b) => {
-                    if (a.startTime < b.startTime) return -1;
-                    if (a.startTime > b.startTime) return 1;
-                    return 0;
-                });
-                
-                // Create time slots from 6:00 AM to 10:00 PM
-                for (let hour = 6; hour <= 22; hour++) {
-                    const timeSlot = document.createElement('div');
-                    timeSlot.className = 'flex items-center py-1 border-b border-gray-200 dark:border-gray-700';
-                    
-                    const timeLabel = document.createElement('div');
-                    timeLabel.className = 'w-16 text-sm text-gray-500 dark:text-gray-400';
-                    timeLabel.textContent = formatTime(hour);
-                    
-                    const timeContent = document.createElement('div');
-                    timeContent.className = 'flex-1 pl-2';
-                    
-                    // Check if there are tasks for this hour
-                    const hourTasks = tasks.filter(task => {
-                        const taskHour = parseInt(task.startTime.split(':')[0]);
-                        return taskHour === hour;
-                    });
-                    
-                    if (hourTasks.length > 0) {
-                        hourTasks.forEach(task => {
-                            const taskElement = document.createElement('div');
-                            taskElement.className = `bg-${task.type}-100 dark:bg-${task.type}-900 rounded p-1 border border-${task.type}-200 dark:border-${task.type}-800 mb-1`;
-                            
-                            const taskTitle = document.createElement('div');
-                            taskTitle.className = `bg-${task.type}-500 dark:bg-${task.type}-600 text-white text-xs p-1 rounded truncate`;
-                            taskTitle.textContent = task.name;
-                            
-                            taskElement.appendChild(taskTitle);
-                            timeContent.appendChild(taskElement);
-                            
-                            // Add click event to edit task
-                            taskElement.addEventListener('click', () => {
-                                openEditTaskModal(task);
-                            });
-                        });
+                    const card = document.createElement('div');
+                    card.className = 'task-card border-red-200 dark:border-red-800';
+                    card.style.setProperty('--task-color', '239, 68, 68');
+
+                    const header = document.createElement('div');
+                    header.className = 'flex items-start justify-between gap-3';
+
+                    const title = document.createElement('div');
+                    title.className = 'flex items-center gap-2 text-sm font-semibold text-red-700 dark:text-red-300';
+
+                    const dot = document.createElement('span');
+                    dot.className = 'task-dot';
+                    dot.style.backgroundColor = TASK_TYPE_COLORS.assignment;
+
+                    const name = document.createElement('span');
+                    name.textContent = deadline.name;
+
+                    title.appendChild(dot);
+                    title.appendChild(name);
+
+                    const time = document.createElement('div');
+                    time.className = 'text-sm font-medium text-red-600 dark:text-red-400';
+                    time.textContent = `${formatReadableDate(deadline.date)} • ${deadline.time}`;
+
+                    header.appendChild(title);
+                    header.appendChild(time);
+                    card.appendChild(header);
+
+                    if (deadline.description) {
+                        const description = document.createElement('div');
+                        description.className = 'text-xs text-gray-500 dark:text-gray-400 mt-2';
+                        description.textContent = deadline.description;
+                        card.appendChild(description);
                     }
-                    
-                    timeSlot.appendChild(timeLabel);
-                    timeSlot.appendChild(timeContent);
-                    dailyScheduleContainer.appendChild(timeSlot);
+
+                    if (deadline.link) {
+                        const link = document.createElement('a');
+                        link.className = 'text-sm text-red-600 dark:text-red-400 mt-3 inline-flex items-center gap-2';
+                        link.href = deadline.link;
+                        link.target = '_blank';
+                        link.rel = 'noopener';
+                        link.innerHTML = '<i class="fa fa-external-link" aria-hidden="true"></i>Open resource';
+                        card.appendChild(link);
+                    }
+
+                    card.addEventListener('click', () => openEditDeadline(deadline));
+                    elements.deadlinesContainer.appendChild(card);
+                });
+            }
+
+            function renderTodosList() {
+                const dateKey = formatDateForStorage(state.selected);
+                const todos = getTodos().filter(todo => todo.date === dateKey);
+
+                elements.todoDateDisplay.textContent = isSameDay(state.selected, state.today) ? 'Today' : formatReadableDate(state.selected);
+                elements.todoPendingContainer.innerHTML = '';
+                elements.todoCompletedContainer.innerHTML = '';
+
+                if (todos.length === 0) {
+                    elements.todoPendingContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">No to-dos yet</div>';
+                    elements.todoCompletedContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">Nothing completed</div>';
+                    return;
+                }
+
+                const pending = todos.filter(todo => !todo.completed);
+                const completed = todos.filter(todo => todo.completed).sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+
+                if (pending.length === 0) {
+                    elements.todoPendingContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">No pending items</div>';
+                } else {
+                    pending.forEach(todo => elements.todoPendingContainer.appendChild(createTodoItem(todo)));
+                }
+
+                if (completed.length === 0) {
+                    elements.todoCompletedContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">No completed items</div>';
+                } else {
+                    completed.forEach(todo => elements.todoCompletedContainer.appendChild(createTodoItem(todo)));
                 }
             }
-            
-            // Render today's summary
+
+            function createTodoItem(todo) {
+                const item = document.createElement('div');
+                item.className = 'todo-item';
+                if (todo.completed) {
+                    item.classList.add('completed');
+                }
+
+                const content = document.createElement('div');
+                content.className = 'flex items-start gap-3 flex-1';
+
+                const toggle = document.createElement('button');
+                toggle.className = 'w-9 h-9 rounded-full border border-emerald-400 flex items-center justify-center text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors';
+                toggle.innerHTML = todo.completed ? '<i class="fa fa-check" aria-hidden="true"></i>' : '<i class="fa fa-circle-o" aria-hidden="true"></i>';
+                toggle.addEventListener('click', event => {
+                    event.stopPropagation();
+                    toggleTodo(todo.id);
+                });
+
+                const text = document.createElement('div');
+                text.className = 'flex-1';
+
+                const title = document.createElement('div');
+                title.className = 'todo-title text-sm font-semibold text-gray-800 dark:text-gray-100';
+                title.textContent = todo.title;
+
+                const notes = document.createElement('div');
+                notes.className = 'text-xs text-gray-500 dark:text-gray-400 mt-1';
+                notes.textContent = todo.notes || '';
+
+                text.appendChild(title);
+                if (todo.notes) {
+                    text.appendChild(notes);
+                }
+
+                content.appendChild(toggle);
+                content.appendChild(text);
+
+                const actions = document.createElement('div');
+                actions.className = 'flex gap-2';
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'todo-action px-3 py-1 rounded-full border border-red-200 dark:border-red-700 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors';
+                deleteButton.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
+                deleteButton.addEventListener('click', event => {
+                    event.stopPropagation();
+                    deleteTodo(todo.id);
+                });
+
+                actions.appendChild(deleteButton);
+                item.appendChild(content);
+                item.appendChild(actions);
+
+                return item;
+            }
+
+            function renderDailySchedule() {
+                const dateKey = formatDateForStorage(state.selected);
+                const schedules = getSchedules().filter(schedule => schedule.date === dateKey).sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+                elements.dailySchedule.innerHTML = '';
+
+                const hours = Array.from({ length: 17 }, (_, index) => 6 + index);
+                hours.forEach(hour => {
+                    const slot = document.createElement('div');
+                    slot.className = 'flex items-start gap-4';
+
+                    const label = document.createElement('div');
+                    label.className = 'w-16 text-xs uppercase text-gray-500 dark:text-gray-400 pt-1';
+                    label.textContent = formatHour(hour);
+
+                    const content = document.createElement('div');
+                    content.className = 'flex-1 space-y-2';
+
+                    const matches = schedules.filter(schedule => parseInt(schedule.startTime.split(':')[0], 10) === hour);
+                    matches.forEach(schedule => {
+                        const pill = document.createElement('div');
+                        pill.className = 'schedule-pill inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-900 border';
+                        const color = TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
+                        pill.style.backgroundColor = `${color}22`;
+                        pill.style.borderColor = `${color}55`;
+                        pill.textContent = `${schedule.startTime} • ${schedule.name}`;
+                        pill.addEventListener('click', () => openEditSchedule(schedule));
+                        content.appendChild(pill);
+                    });
+
+                    slot.appendChild(label);
+                    slot.appendChild(content);
+                    elements.dailySchedule.appendChild(slot);
+                });
+            }
+
             function renderTodaySummary() {
-                const todayTasksContainer = document.getElementById('today-tasks-container');
-                const todayDeadlinesContainer = document.getElementById('today-deadlines-container');
-                
-                todayTasksContainer.innerHTML = '';
-                todayDeadlinesContainer.innerHTML = '';
-                
-                const todayString = formatDateForStorage(currentDate);
-                const tasks = JSON.parse(localStorage.getItem('tasks')).filter(task => task.date === todayString);
-                const deadlines = JSON.parse(localStorage.getItem('deadlines')).filter(deadline => deadline.date === todayString);
-                
-                // Sort tasks by start time
-                tasks.sort((a, b) => {
-                    if (a.startTime < b.startTime) return -1;
-                    if (a.startTime > b.startTime) return 1;
-                    return 0;
-                });
-                
-                // Sort deadlines by time
-                deadlines.sort((a, b) => {
-                    if (a.time < b.time) return -1;
-                    if (a.time > b.time) return 1;
-                    return 0;
-                });
-                
-                // Add tasks
-                if (tasks.length === 0) {
-                    const noTasksMessage = document.createElement('div');
-                    noTasksMessage.className = 'text-gray-500 dark:text-gray-400 text-center py-2';
-                    noTasksMessage.textContent = 'No tasks for today';
-                    todayTasksContainer.appendChild(noTasksMessage);
+                const todayKey = formatDateForStorage(state.today);
+                const schedules = getSchedules().filter(schedule => schedule.date === todayKey).sort((a, b) => a.startTime.localeCompare(b.startTime));
+                const deadlines = getDeadlines().filter(deadline => deadline.date === todayKey).sort((a, b) => a.time.localeCompare(b.time));
+                const todos = getTodos().filter(todo => todo.date === todayKey);
+
+                elements.todayScheduleContainer.innerHTML = '';
+                elements.todayDeadlinesContainer.innerHTML = '';
+                elements.todayTodosContainer.innerHTML = '';
+
+                if (schedules.length === 0) {
+                    elements.todayScheduleContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">No schedule items today</div>';
                 } else {
-                    tasks.forEach(task => {
-                        const taskElement = document.createElement('div');
-                        taskElement.className = `bg-${task.type}-50 dark:bg-${task.type}-900/30 p-2 rounded-md border border-${task.type}-100 dark:border-${task.type}-800 text-sm`;
-                        
-                        const taskHeader = document.createElement('div');
-                        taskHeader.className = 'flex justify-between items-center';
-                        
-                        const taskTitle = document.createElement('div');
-                        taskTitle.className = `font-medium text-${task.type}-700 dark:text-${task.type}-300 flex items-center`;
-                        
-                        const taskDot = document.createElement('span');
-                        taskDot.className = `task-dot task-${task.type}`;
-                        
-                        const taskName = document.createElement('span');
-                        taskName.textContent = task.name;
-                        
-                        taskTitle.appendChild(taskDot);
-                        taskTitle.appendChild(taskName);
-                        
-                        const taskTime = document.createElement('span');
-                        taskTime.className = `text-xs text-${task.type}-600 dark:text-${task.type}-400`;
-                        taskTime.textContent = `${task.startTime} - ${task.endTime}`;
-                        
-                        taskHeader.appendChild(taskTitle);
-                        taskHeader.appendChild(taskTime);
-                        
-                        taskElement.appendChild(taskHeader);
-                        
-                        // Add click event to edit task
-                        taskElement.addEventListener('click', () => {
-                            openEditTaskModal(task);
-                        });
-                        
-                        todayTasksContainer.appendChild(taskElement);
+                    schedules.forEach(schedule => {
+                        const item = document.createElement('div');
+                        item.className = 'todo-item';
+                        const color = TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
+                        item.style.backgroundColor = `${color}15`;
+                        item.style.borderColor = `${color}55`;
+                        const title = document.createElement('div');
+                        title.className = 'text-sm font-semibold text-gray-800 dark:text-gray-100';
+                        title.textContent = schedule.name;
+                        const time = document.createElement('div');
+                        time.className = 'text-xs text-gray-500 dark:text-gray-400';
+                        time.textContent = `${schedule.startTime} - ${schedule.endTime}`;
+                        item.appendChild(title);
+                        item.appendChild(time);
+                        item.addEventListener('click', () => openEditSchedule(schedule));
+                        elements.todayScheduleContainer.appendChild(item);
                     });
                 }
-                
-                // Add deadlines
+
                 if (deadlines.length === 0) {
-                    const noDeadlinesMessage = document.createElement('div');
-                    noDeadlinesMessage.className = 'text-gray-500 dark:text-gray-400 text-center py-2';
-                    noDeadlinesMessage.textContent = 'No deadlines for today';
-                    todayDeadlinesContainer.appendChild(noDeadlinesMessage);
+                    elements.todayDeadlinesContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">No deadlines today</div>';
                 } else {
                     deadlines.forEach(deadline => {
-                        const deadlineElement = document.createElement('div');
-                        deadlineElement.className = 'bg-red-50 dark:bg-red-900/30 p-2 rounded-md border border-red-100 dark:border-red-800 text-sm';
-                        
-                        const deadlineHeader = document.createElement('div');
-                        deadlineHeader.className = 'flex justify-between items-center';
-                        
-                        const deadlineTitle = document.createElement('div');
-                        deadlineTitle.className = 'font-medium text-red-700 dark:text-red-300 flex items-center';
-                        
-                        const deadlineDot = document.createElement('span');
-                        deadlineDot.className = 'task-dot task-assignment';
-                        
-                        const deadlineName = document.createElement('span');
-                        deadlineName.textContent = deadline.name;
-                        
-                        deadlineTitle.appendChild(deadlineDot);
-                        deadlineTitle.appendChild(deadlineName);
-                        
-                        const deadlineTime = document.createElement('span');
-                        deadlineTime.className = 'text-xs text-red-600 dark:text-red-400';
-                        deadlineTime.textContent = deadline.time;
-                        
-                        deadlineHeader.appendChild(deadlineTitle);
-                        deadlineHeader.appendChild(deadlineTime);
-                        
-                        deadlineElement.appendChild(deadlineHeader);
-                        
-                        // Add click event to edit deadline
-                        deadlineElement.addEventListener('click', () => {
-                            openEditDeadlineModal(deadline);
-                        });
-                        
-                        todayDeadlinesContainer.appendChild(deadlineElement);
+                        const item = document.createElement('div');
+                        item.className = 'todo-item';
+                        item.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+                        item.style.borderColor = 'rgba(239, 68, 68, 0.45)';
+                        const title = document.createElement('div');
+                        title.className = 'text-sm font-semibold text-red-700 dark:text-red-300';
+                        title.textContent = deadline.name;
+                        const time = document.createElement('div');
+                        time.className = 'text-xs text-red-500 dark:text-red-300';
+                        time.textContent = deadline.time;
+                        item.appendChild(title);
+                        item.appendChild(time);
+                        item.addEventListener('click', () => openEditDeadline(deadline));
+                        elements.todayDeadlinesContainer.appendChild(item);
+                    });
+                }
+
+                if (todos.length === 0) {
+                    elements.todayTodosContainer.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">No to-dos for today</div>';
+                } else {
+                    todos.sort((a, b) => Number(a.completed) - Number(b.completed));
+                    todos.forEach(todo => {
+                        const item = document.createElement('div');
+                        item.className = 'todo-item';
+                        if (todo.completed) {
+                            item.classList.add('completed');
+                        }
+                        const title = document.createElement('div');
+                        title.className = 'text-sm font-semibold text-gray-800 dark:text-gray-100';
+                        title.textContent = todo.title;
+                        item.appendChild(title);
+                        item.addEventListener('click', () => toggleTodo(todo.id));
+                        elements.todayTodosContainer.appendChild(item);
                     });
                 }
             }
-            
-            // Open add task modal
-            function openAddTaskModal() {
-                const taskDateInput = document.getElementById('task-date-input');
-                const taskDate = document.getElementById('task-date');
-                
-                // Set default date to selected date
-                const defaultDate = formatDateForInput(selectedDate);
-                taskDateInput.value = defaultDate;
-                taskDate.value = defaultDate;
-                
-                // Reset form
-                addTaskForm.reset();
-                
-                // Show modal
-                addTaskModal.classList.remove('hidden');
+
+            function openAddModal(type) {
+                closeAllModals();
+                const dateValue = formatDateForStorage(state.selected);
+                if (type === 'schedule') {
+                    elements.addTaskForm.reset();
+                    document.getElementById('task-date-input').value = dateValue;
+                    elements.addTaskModal.classList.remove('hidden');
+                } else if (type === 'deadline') {
+                    elements.addDeadlineForm.reset();
+                    document.getElementById('deadline-date-input').value = dateValue;
+                    elements.addDeadlineModal.classList.remove('hidden');
+                } else {
+                    elements.addTodoForm.reset();
+                    document.getElementById('todo-date-input').value = dateValue;
+                    elements.addTodoModal.classList.remove('hidden');
+                }
             }
-            
-            // Open add deadline modal
-            function openAddDeadlineModal() {
-                const deadlineDateInput = document.getElementById('deadline-date-input');
-                const deadlineDate = document.getElementById('deadline-date');
-                
-                // Set default date to selected date
-                const defaultDate = formatDateForInput(selectedDate);
-                deadlineDateInput.value = defaultDate;
-                deadlineDate.value = defaultDate;
-                
-                // Reset form
-                addDeadlineForm.reset();
-                
-                // Show modal
-                addDeadlineModal.classList.remove('hidden');
+
+            function openEditSchedule(schedule) {
+                document.getElementById('edit-task-id').value = schedule.id;
+                document.getElementById('edit-task-name').value = schedule.name;
+                document.getElementById('edit-task-type').value = schedule.type;
+                document.getElementById('edit-task-date').value = schedule.date;
+                document.getElementById('edit-start-time').value = schedule.startTime;
+                document.getElementById('edit-end-time').value = schedule.endTime;
+                document.getElementById('edit-location').value = schedule.location || '';
+                document.getElementById('edit-description').value = schedule.description || '';
+                document.getElementById('edit-link').value = schedule.link || '';
+                closeAllModals();
+                elements.editTaskModal.classList.remove('hidden');
             }
-            
-            // Open edit task modal
-            function openEditTaskModal(task) {
-                document.getElementById('edit-task-id').value = task.id;
-                document.getElementById('edit-task-name').value = task.name;
-                document.getElementById('edit-task-type').value = task.type;
-                document.getElementById('edit-task-date').value = task.date;
-                document.getElementById('edit-start-time').value = task.startTime;
-                document.getElementById('edit-end-time').value = task.endTime;
-                document.getElementById('edit-location').value = task.location || '';
-                document.getElementById('edit-description').value = task.description || '';
-                document.getElementById('edit-link').value = task.link || '';
-                
-                // Show modal
-                editTaskModal.classList.remove('hidden');
-            }
-            
-            // Open edit deadline modal
-            function openEditDeadlineModal(deadline) {
+
+            function openEditDeadline(deadline) {
                 document.getElementById('edit-deadline-id').value = deadline.id;
                 document.getElementById('edit-deadline-name').value = deadline.name;
                 document.getElementById('edit-deadline-date').value = deadline.date;
                 document.getElementById('edit-deadline-time').value = deadline.time;
                 document.getElementById('edit-deadline-description').value = deadline.description || '';
                 document.getElementById('edit-deadline-link').value = deadline.link || '';
-                
-                // Show modal
-                editDeadlineModal.classList.remove('hidden');
+                closeAllModals();
+                elements.editDeadlineModal.classList.remove('hidden');
             }
-            
-            // Close all modals
+
             function closeAllModals() {
-                addTaskModal.classList.add('hidden');
-                addDeadlineModal.classList.add('hidden');
-                editTaskModal.classList.add('hidden');
-                editDeadlineModal.classList.add('hidden');
+                [elements.addTaskModal, elements.addDeadlineModal, elements.addTodoModal, elements.editTaskModal, elements.editDeadlineModal].forEach(modal => modal.classList.add('hidden'));
             }
-            
-            // Add task
-            function addTask(taskData) {
-                const tasks = JSON.parse(localStorage.getItem('tasks'));
-                tasks.push(taskData);
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-                
-                // Refresh views
-                renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
-                renderTasks();
-                renderDailySchedule();
-                renderTodaySummary();
-            }
-            
-            // Add deadline
-            function addDeadline(deadlineData) {
-                const deadlines = JSON.parse(localStorage.getItem('deadlines'));
-                deadlines.push(deadlineData);
-                localStorage.setItem('deadlines', JSON.stringify(deadlines));
-                
-                // Refresh views
-                renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
-                renderDeadlines();
-                renderTodaySummary();
-            }
-            
-            // Update task
-            function updateTask(taskId, updatedData) {
-                const tasks = JSON.parse(localStorage.getItem('tasks'));
-                const taskIndex = tasks.findIndex(task => task.id === taskId);
-                
-                if (taskIndex !== -1) {
-                    tasks[taskIndex] = { ...tasks[taskIndex], ...updatedData };
-                    localStorage.setItem('tasks', JSON.stringify(tasks));
-                    
-                    // Refresh views
-                    renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
-                    renderTasks();
-                    renderDailySchedule();
-                    renderTodaySummary();
-                }
-            }
-            
-            // Update deadline
-            function updateDeadline(deadlineId, updatedData) {
-                const deadlines = JSON.parse(localStorage.getItem('deadlines'));
-                const deadlineIndex = deadlines.findIndex(deadline => deadline.id === deadlineId);
-                
-                if (deadlineIndex !== -1) {
-                    deadlines[deadlineIndex] = { ...deadlines[deadlineIndex], ...updatedData };
-                    localStorage.setItem('deadlines', JSON.stringify(deadlines));
-                    
-                    // Refresh views
-                    renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
-                    renderDeadlines();
-                    renderTodaySummary();
-                }
-            }
-            
-            // Delete task
-            function deleteTask(taskId) {
-                if (confirm('Are you sure you want to delete this task?')) {
-                    const tasks = JSON.parse(localStorage.getItem('tasks'));
-                    const updatedTasks = tasks.filter(task => task.id !== taskId);
-                    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-                    
-                    // Close modal
-                    closeAllModals();
-                    
-                    // Refresh views
-                    renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
-                    renderTasks();
-                    renderDailySchedule();
-                    renderTodaySummary();
-                }
-            }
-            
-            // Delete deadline
-            function deleteDeadline(deadlineId) {
-                if (confirm('Are you sure you want to delete this deadline?')) {
-                    const deadlines = JSON.parse(localStorage.getItem('deadlines'));
-                    const updatedDeadlines = deadlines.filter(deadline => deadline.id !== deadlineId);
-                    localStorage.setItem('deadlines', JSON.stringify(updatedDeadlines));
-                    
-                    // Close modal
-                    closeAllModals();
-                    
-                    // Refresh views
-                    renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
-                    renderDeadlines();
-                    renderTodaySummary();
-                }
-            }
-            
-            // Event Listeners
-            prevMonthButton.addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-            });
-            
-            nextMonthButton.addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-            });
-            
-            todayButton.addEventListener('click', () => {
-                currentDate = new Date();
-                selectedDate = new Date();
-                selectedDateDisplay.textContent = 'Today';
-                renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-                renderTasks();
-                renderDeadlines();
-                renderDailySchedule();
-                renderTodaySummary();
-            });
-            
-            addTaskButton.addEventListener('click', openAddTaskModal);
-            addDeadlineButton.addEventListener('click', openAddDeadlineModal);
-            
-            closeModalButtons.forEach(button => {
-                button.addEventListener('click', closeAllModals);
-            });
-            
-            addTaskForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                const taskData = {
+
+            function handleAddSchedule(event) {
+                event.preventDefault();
+                const payload = {
                     id: generateId(),
-                    name: document.getElementById('task-name').value,
-                    type: document.getElementById('task-type').value,
-                    date: document.getElementById('task-date').value,
-                    startTime: document.getElementById('start-time').value,
-                    endTime: document.getElementById('end-time').value,
-                    location: document.getElementById('location').value,
-                    description: document.getElementById('description').value,
-                    link: document.getElementById('link').value
+                    name: event.target['task-name'].value.trim(),
+                    type: event.target['task-type'].value,
+                    date: event.target['task-date-input'].value,
+                    startTime: event.target['start-time'].value,
+                    endTime: event.target['end-time'].value,
+                    location: event.target['location'].value.trim(),
+                    description: event.target['description'].value.trim(),
+                    link: event.target['link'].value.trim()
                 };
-                
-                addTask(taskData);
+                const schedules = getSchedules();
+                schedules.push(payload);
+                saveItems(STORAGE_KEYS.schedules, schedules);
                 closeAllModals();
-            });
-            
-            addDeadlineForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                const deadlineData = {
+                renderAll();
+            }
+
+            function handleAddDeadline(event) {
+                event.preventDefault();
+                const payload = {
                     id: generateId(),
-                    name: document.getElementById('deadline-name').value,
-                    date: document.getElementById('deadline-date').value,
-                    time: document.getElementById('deadline-time').value,
-                    description: document.getElementById('deadline-description').value,
-                    link: document.getElementById('deadline-link').value
+                    name: event.target['deadline-name'].value.trim(),
+                    date: event.target['deadline-date-input'].value,
+                    time: event.target['deadline-time'].value,
+                    description: event.target['deadline-description'].value.trim(),
+                    link: event.target['deadline-link'].value.trim()
                 };
-                
-                addDeadline(deadlineData);
+                const deadlines = getDeadlines();
+                deadlines.push(payload);
+                saveItems(STORAGE_KEYS.deadlines, deadlines);
                 closeAllModals();
-            });
-            
-            editTaskForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                const taskId = document.getElementById('edit-task-id').value;
-                const updatedData = {
-                    name: document.getElementById('edit-task-name').value,
-                    type: document.getElementById('edit-task-type').value,
-                    date: document.getElementById('edit-task-date').value,
-                    startTime: document.getElementById('edit-start-time').value,
-                    endTime: document.getElementById('edit-end-time').value,
-                    location: document.getElementById('edit-location').value,
-                    description: document.getElementById('edit-description').value,
-                    link: document.getElementById('edit-link').value
+                renderAll();
+            }
+
+            function handleAddTodo(event) {
+                event.preventDefault();
+                const payload = {
+                    id: generateId(),
+                    title: event.target['todo-title'].value.trim(),
+                    notes: event.target['todo-notes'].value.trim(),
+                    date: event.target['todo-date-input'].value,
+                    completed: false,
+                    completedAt: null
                 };
-                
-                updateTask(taskId, updatedData);
+                const todos = getTodos();
+                todos.push(payload);
+                saveItems(STORAGE_KEYS.todos, todos);
                 closeAllModals();
-            });
-            
-            editDeadlineForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                
+                renderAll();
+            }
+
+            function handleEditSchedule(event) {
+                event.preventDefault();
+                const scheduleId = event.target['edit-task-id'].value;
+                const schedules = getSchedules();
+                const index = schedules.findIndex(schedule => schedule.id === scheduleId);
+                if (index === -1) {
+                    return;
+                }
+                schedules[index] = {
+                    ...schedules[index],
+                    name: event.target['edit-task-name'].value.trim(),
+                    type: event.target['edit-task-type'].value,
+                    date: event.target['edit-task-date'].value,
+                    startTime: event.target['edit-start-time'].value,
+                    endTime: event.target['edit-end-time'].value,
+                    location: event.target['edit-location'].value.trim(),
+                    description: event.target['edit-description'].value.trim(),
+                    link: event.target['edit-link'].value.trim()
+                };
+                saveItems(STORAGE_KEYS.schedules, schedules);
+                closeAllModals();
+                renderAll();
+            }
+
+            function handleEditDeadline(event) {
+                event.preventDefault();
+                const deadlineId = event.target['edit-deadline-id'].value;
+                const deadlines = getDeadlines();
+                const index = deadlines.findIndex(deadline => deadline.id === deadlineId);
+                if (index === -1) {
+                    return;
+                }
+                deadlines[index] = {
+                    ...deadlines[index],
+                    name: event.target['edit-deadline-name'].value.trim(),
+                    date: event.target['edit-deadline-date'].value,
+                    time: event.target['edit-deadline-time'].value,
+                    description: event.target['edit-deadline-description'].value.trim(),
+                    link: event.target['edit-deadline-link'].value.trim()
+                };
+                saveItems(STORAGE_KEYS.deadlines, deadlines);
+                closeAllModals();
+                renderAll();
+            }
+
+            function handleDeleteSchedule() {
+                if (!confirm('Delete this schedule item?')) {
+                    return;
+                }
+                const scheduleId = document.getElementById('edit-task-id').value;
+                const schedules = getSchedules().filter(schedule => schedule.id !== scheduleId);
+                saveItems(STORAGE_KEYS.schedules, schedules);
+                closeAllModals();
+                renderAll();
+            }
+
+            function handleDeleteDeadline() {
+                if (!confirm('Delete this deadline?')) {
+                    return;
+                }
                 const deadlineId = document.getElementById('edit-deadline-id').value;
-                const updatedData = {
-                    name: document.getElementById('edit-deadline-name').value,
-                    date: document.getElementById('edit-deadline-date').value,
-                    time: document.getElementById('edit-deadline-time').value,
-                    description: document.getElementById('edit-deadline-description').value,
-                    link: document.getElementById('edit-deadline-link').value
-                };
-                
-                updateDeadline(deadlineId, updatedData);
+                const deadlines = getDeadlines().filter(deadline => deadline.id !== deadlineId);
+                saveItems(STORAGE_KEYS.deadlines, deadlines);
                 closeAllModals();
-            });
-            
-            deleteTaskButton.addEventListener('click', () => {
-                const taskId = document.getElementById('edit-task-id').value;
-                deleteTask(taskId);
-            });
-            
-            deleteDeadlineButton.addEventListener('click', () => {
-                const deadlineId = document.getElementById('edit-deadline-id').value;
-                deleteDeadline(deadlineId);
-            });
-            
-            // Set task date when date input changes
-            document.getElementById('task-date-input').addEventListener('change', (e) => {
-                document.getElementById('task-date').value = e.target.value;
-            });
-            
-            // Set deadline date when date input changes
-            document.getElementById('deadline-date-input').addEventListener('change', (e) => {
-                document.getElementById('deadline-date').value = e.target.value;
-            });
-            
-            // Initialize calendar
-            selectedDateDisplay.textContent = 'Today';
-            renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-            renderTasks();
-            renderDeadlines();
-            renderDailySchedule();
-            renderTodaySummary();
+                renderAll();
+            }
+
+            function toggleTodo(id) {
+                const todos = getTodos();
+                const index = todos.findIndex(todo => todo.id === id);
+                if (index === -1) {
+                    return;
+                }
+                const todo = todos[index];
+                const completed = !todo.completed;
+                todos[index] = {
+                    ...todo,
+                    completed,
+                    completedAt: completed ? Date.now() : null
+                };
+                saveItems(STORAGE_KEYS.todos, todos);
+                renderAll();
+            }
+
+            function deleteTodo(id) {
+                const todos = getTodos().filter(todo => todo.id !== id);
+                saveItems(STORAGE_KEYS.todos, todos);
+                renderAll();
+            }
         });
-        
-        // Helper Functions
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+
+        function initialiseTheme(bodyElement, toggleButton) {
+            const rootElement = document.documentElement;
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            const setTheme = (isDark) => {
+                [rootElement, bodyElement].forEach(element => {
+                    if (!element) {
+                        return;
+                    }
+                    element.classList.toggle('dark', isDark);
+                });
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            };
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                setTheme(true);
+            } else {
+                setTheme(false);
+            }
+
+            if (!toggleButton) {
+                return;
+            }
+
+            toggleButton.addEventListener('click', () => {
+                const nextIsDark = !rootElement.classList.contains('dark');
+                setTheme(nextIsDark);
+            });
         }
-        
-        function formatDate(date) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-            return date.toLocaleDateString('en-US', options);
+
+        function initialiseNavigation(button, menu) {
+            button.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
         }
-        
+
+        function ensureSeedData() {
+            migrateLegacySchedules();
+            if (getSchedules().length === 0) {
+                saveItems(STORAGE_KEYS.schedules, createSampleSchedules());
+            }
+            if (getDeadlines().length === 0) {
+                saveItems(STORAGE_KEYS.deadlines, createSampleDeadlines());
+            }
+            if (getTodos().length === 0) {
+                saveItems(STORAGE_KEYS.todos, createSampleTodos());
+            }
+        }
+
+        function migrateLegacySchedules() {
+            const legacy = localStorage.getItem(STORAGE_KEYS.legacyTasks);
+            if (!legacy || localStorage.getItem(STORAGE_KEYS.schedules)) {
+                return;
+            }
+            try {
+                const parsed = JSON.parse(legacy);
+                if (Array.isArray(parsed)) {
+                    saveItems(STORAGE_KEYS.schedules, parsed.map(task => ({
+                        id: task.id || generateId(),
+                        name: task.name || task.title || 'Untitled',
+                        type: task.type || 'other',
+                        date: task.date,
+                        startTime: task.startTime || '09:00',
+                        endTime: task.endTime || '10:00',
+                        location: task.location || '',
+                        description: task.description || '',
+                        link: task.link || ''
+                    })));
+                }
+            } catch (error) {
+                console.warn('Failed to migrate legacy tasks', error);
+            }
+        }
+
+        function createSampleSchedules() {
+            const today = normaliseDate(new Date());
+            const tomorrow = normaliseDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
+            return [
+                {
+                    id: generateId(),
+                    name: 'Introduction to Computer Science',
+                    type: 'lecture',
+                    date: formatDateForStorage(today),
+                    startTime: '09:00',
+                    endTime: '11:00',
+                    location: 'Main Hall, Building A',
+                    description: 'Kick-off lecture covering semester overview and core concepts.',
+                    link: 'https://example.com/lecture1'
+                },
+                {
+                    id: generateId(),
+                    name: 'Programming Basics Tutorial',
+                    type: 'tutorial',
+                    date: formatDateForStorage(today),
+                    startTime: '12:30',
+                    endTime: '14:00',
+                    location: 'Computer Lab, Building B',
+                    description: 'Hands-on session for programming fundamentals.',
+                    link: ''
+                },
+                {
+                    id: generateId(),
+                    name: 'Project Discussion Meeting',
+                    type: 'meeting',
+                    date: formatDateForStorage(today),
+                    startTime: '15:30',
+                    endTime: '16:30',
+                    location: 'Conference Room, Building C',
+                    description: 'Align deliverables and next steps with the project team.',
+                    link: ''
+                },
+                {
+                    id: generateId(),
+                    name: 'Data Structures Lecture',
+                    type: 'lecture',
+                    date: formatDateForStorage(tomorrow),
+                    startTime: '10:00',
+                    endTime: '12:00',
+                    location: 'Main Hall, Building A',
+                    description: 'In-depth session on arrays, linked lists, and trees.',
+                    link: ''
+                }
+            ];
+        }
+
+        function createSampleDeadlines() {
+            const today = normaliseDate(new Date());
+            const twoDaysLater = normaliseDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2));
+            return [
+                {
+                    id: generateId(),
+                    name: 'Data Structures Assignment',
+                    date: formatDateForStorage(today),
+                    time: '23:59',
+                    description: 'Submit linked list implementation and analysis.',
+                    link: 'https://example.com/assignment'
+                },
+                {
+                    id: generateId(),
+                    name: 'Midterm Registration',
+                    date: formatDateForStorage(twoDaysLater),
+                    time: '18:00',
+                    description: 'Final day to register for midterm examination slots.',
+                    link: ''
+                }
+            ];
+        }
+
+        function createSampleTodos() {
+            const today = formatDateForStorage(normaliseDate(new Date()));
+            return [
+                {
+                    id: generateId(),
+                    title: 'Review lecture notes',
+                    notes: 'Focus on recursion walkthrough.',
+                    date: today,
+                    completed: false,
+                    completedAt: null
+                },
+                {
+                    id: generateId(),
+                    title: 'Plan project outline',
+                    notes: 'Draft milestones before Friday stand-up.',
+                    date: today,
+                    completed: false,
+                    completedAt: null
+                }
+            ];
+        }
+
+        function getSchedules() {
+            return loadItems(STORAGE_KEYS.schedules);
+        }
+
+        function getDeadlines() {
+            return loadItems(STORAGE_KEYS.deadlines);
+        }
+
+        function getTodos() {
+            return loadItems(STORAGE_KEYS.todos);
+        }
+
+        function loadItems(key) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : [];
+            } catch (error) {
+                console.warn('Failed to load data for', key, error);
+                return [];
+            }
+        }
+
+        function saveItems(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function normaliseDate(date) {
+            const instance = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            instance.setHours(0, 0, 0, 0);
+            return instance;
+        }
+
         function formatDateForStorage(date) {
-            return date.toISOString().split('T')[0];
+            if (typeof date === 'string') {
+                return date;
+            }
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
-        
-        function formatDateForInput(date) {
-            return date.toISOString().split('T')[0];
+
+        function formatReadableDate(date) {
+            if (typeof date === 'string') {
+                return formatReadableDate(new Date(date));
+            }
+            return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
         }
-        
-        function formatTime(hour) {
+
+        function formatHour(hour) {
             const period = hour >= 12 ? 'PM' : 'AM';
-            const displayHour = hour % 12 === 0 ? 12 : hour % 12;
-            return `${displayHour}:00 ${period}`;
+            const display = hour % 12 === 0 ? 12 : hour % 12;
+            return `${display}:00 ${period}`;
+        }
+
+        function isSameDay(a, b) {
+            return formatDateForStorage(a) === formatDateForStorage(b);
+        }
+
+        function generateId() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                return crypto.randomUUID();
+            }
+            return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+        }
+
+        function hexToRgb(hex) {
+            const sanitized = hex.replace('#', '');
+            const bigint = parseInt(sanitized, 16);
+            return {
+                r: (bigint >> 16) & 255,
+                g: (bigint >> 8) & 255,
+                b: bigint & 255
+            };
         }
     </script>
 </body>

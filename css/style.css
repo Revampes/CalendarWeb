@@ -243,10 +243,15 @@ html, body {
     font-size: 0.875rem;
     font-weight: 500;
     margin-bottom: 0.25rem;
+    color: var(--text-primary);
 }
 
 .calendar-day.other-month {
     opacity: 0.4;
+}
+
+.calendar-day.other-month .calendar-day-number {
+    color: var(--text-muted);
 }
 
 .day-indicators {
@@ -382,6 +387,7 @@ html, body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    color: var(--text-primary);
 }
 
 .task-item-time {
@@ -571,10 +577,12 @@ html, body {
     font-size: 0.875rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
 }
 
 .summary-item:hover {
     box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
 }
 
 /* Animations */
