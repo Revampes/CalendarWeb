@@ -254,94 +254,6 @@ function getTaskColor(taskType) {
     return taskColors[taskType] || taskColors.other;
 }
 
-// Initialize sample data if none exists
-function initSampleData() {
-    const tasks = Storage.getTasks();
-    const deadlines = Storage.getDeadlines();
-    
-    // Only add sample data if storage is empty
-    if (tasks.length === 0) {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        const sampleTasks = [
-            {
-                id: generateId(),
-                name: 'Introduction to Computer Science',
-                type: 'lecture',
-                date: formatDateForStorage(today),
-                startTime: '09:00',
-                endTime: '11:00',
-                location: 'Main Hall, Building A',
-                description: 'First lecture of the semester covering basic concepts',
-                link: 'https://example.com/lecture1'
-            },
-            {
-                id: generateId(),
-                name: 'Programming Basics Tutorial',
-                type: 'tutorial',
-                date: formatDateForStorage(today),
-                startTime: '12:00',
-                endTime: '14:00',
-                location: 'Computer Lab, Building B',
-                description: 'Hands-on session for programming fundamentals',
-                link: ''
-            },
-            {
-                id: generateId(),
-                name: 'Project Discussion Meeting',
-                type: 'meeting',
-                date: formatDateForStorage(today),
-                startTime: '15:00',
-                endTime: '16:00',
-                location: 'Conference Room, Building C',
-                description: 'Group discussion for the upcoming project',
-                link: ''
-            },
-            {
-                id: generateId(),
-                name: 'Data Structures Lecture',
-                type: 'lecture',
-                date: formatDateForStorage(tomorrow),
-                startTime: '10:00',
-                endTime: '12:00',
-                location: 'Main Hall, Building A',
-                description: 'Lecture on arrays, linked lists, and trees',
-                link: ''
-            }
-        ];
-        
-        Storage.saveTasks(sampleTasks);
-    }
-    
-    if (deadlines.length === 0) {
-        const today = new Date();
-        const twoDaysLater = new Date(today);
-        twoDaysLater.setDate(twoDaysLater.getDate() + 2);
-        
-        const sampleDeadlines = [
-            {
-                id: generateId(),
-                name: 'Data Structures Assignment',
-                date: formatDateForStorage(today),
-                time: '23:59',
-                description: 'Complete the assignment on linked lists and submit via the portal',
-                link: 'https://example.com/assignment1'
-            },
-            {
-                id: generateId(),
-                name: 'Midterm Exam Registration',
-                date: formatDateForStorage(twoDaysLater),
-                time: '18:00',
-                description: 'Last day to register for midterm exams',
-                link: ''
-            }
-        ];
-        
-        Storage.saveDeadlines(sampleDeadlines);
-    }
-}
 
 // Export for use in other scripts
 window.CalendarApp = {
@@ -358,6 +270,5 @@ window.CalendarApp = {
     isToday,
     isSameDate,
     getTaskColor,
-    closeAllModals,
-    initSampleData
+    closeAllModals
 };

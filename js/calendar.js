@@ -10,9 +10,6 @@ const CalendarState = {
 
 // Initialize calendar page
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize sample data if needed
-    CalendarApp.initSampleData();
-    
     // Setup event listeners
     initCalendarControls();
     initTaskButtons();

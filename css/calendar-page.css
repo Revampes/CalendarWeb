@@ -1,0 +1,176 @@
+.text-shadow {
+    text-shadow: 0 2px 4px rgba(15, 23, 42, 0.1);
+}
+
+.bg-gradient-light {
+    background: linear-gradient(135deg, #e0f2fe 0%, #eef2ff 100%);
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.6);
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.task-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 9999px;
+    display: inline-block;
+}
+
+.calendar-day-cell {
+    position: relative;
+    min-height: 96px;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(255, 255, 255, 0.85);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.calendar-day-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.dark .calendar-day-cell {
+    background: rgba(15, 23, 42, 0.65);
+    border-color: rgba(71, 85, 105, 0.55);
+}
+
+.calendar-day-number {
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.82);
+}
+
+.dark .calendar-day-number {
+    color: rgba(226, 232, 240, 0.9);
+}
+
+.calendar-day-meta {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    width: 100%;
+}
+
+.deadline-marker {
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    right: 6px;
+    width: 3px;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.65));
+}
+
+.task-card {
+    position: relative;
+    padding: 1rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(var(--task-color, 99, 102, 241), 0.35);
+    background: linear-gradient(135deg, rgba(var(--task-color, 99, 102, 241), 0.18), rgba(var(--task-color, 99, 102, 241), 0.08));
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(var(--task-color, 99, 102, 241), 0.22);
+}
+
+.dark .task-card {
+    background: linear-gradient(135deg, rgba(var(--task-color, 99, 102, 241), 0.28), rgba(var(--task-color, 99, 102, 241), 0.12));
+    border-color: rgba(var(--task-color, 99, 102, 241), 0.5);
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(248, 250, 252, 0.8);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.todo-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.dark .todo-item {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(71, 85, 105, 0.45);
+}
+
+.todo-item.completed {
+    opacity: 0.7;
+}
+
+.todo-item.completed .todo-title {
+    text-decoration: line-through;
+}
+
+.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.daily-reminder-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+    padding: 1rem;
+}
+
+.daily-reminder-card {
+    max-width: 420px;
+    width: 100%;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    background: var(--card-bg, #ffffff);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+}
+
+.dark .daily-reminder-card {
+    --card-bg: #0f172a;
+}
+
+.daily-reminder-card h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.daily-reminder-card ul {
+    margin: 0;
+    padding: 0 0 0 1rem;
+}
+
+.daily-reminder-card li {
+    margin-bottom: 0.25rem;
+}
