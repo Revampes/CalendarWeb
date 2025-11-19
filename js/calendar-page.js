@@ -26,6 +26,14 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
 
         const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+        const multiDateSelectors = {};
+        const ICS_KIND_FIELD = 'X-CALENDARWEB-KIND';
+        const ICS_KIND = {
+            schedule: 'SCHEDULE',
+            deadline: 'DEADLINE',
+            todo: 'TODO'
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const state = {
                 today: normaliseDate(new Date()),
@@ -73,6 +81,11 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 modalContainers: document.querySelectorAll('.modal'),
                 importIcsButton: document.getElementById('import-ics-btn'),
                 icsFileInput: document.getElementById('ics-file-input'),
+                importIcsModal: document.getElementById('import-ics-modal'),
+                icsDropZone: document.getElementById('ics-drop-zone'),
+                icsLinkInput: document.getElementById('ics-link-input'),
+                fetchIcsLinkButton: document.getElementById('fetch-ics-link-btn'),
+                exportIcsButton: document.getElementById('export-ics-btn'),
                 syncCanvasButton: document.getElementById('sync-canvas-btn'),
                 clearAllButton: document.getElementById('clear-all-btn'),
                 canvasBaseUrlInput: document.getElementById('canvas-base-url-input'),
@@ -98,6 +111,23 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             initialiseNavigation(elements.mobileMenuButton, elements.mobileMenu);
             ensureSeedData();
             initialiseCanvasSettings();
+            disableCanvasCredentials();
+
+            multiDateSelectors.schedule = createCalendarDateSelector({
+                hiddenInputId: 'task-dates-hidden',
+                listContainerId: 'task-selected-dates',
+                pickerContainerId: 'task-date-picker',
+                toneSetter: setAutomationStatus,
+                emptyMessage: 'No schedule dates selected yet.'
+            });
+
+            multiDateSelectors.todo = createCalendarDateSelector({
+                hiddenInputId: 'todo-dates-hidden',
+                listContainerId: 'todo-selected-dates',
+                pickerContainerId: 'todo-date-picker',
+                toneSetter: setAutomationStatus,
+                emptyMessage: 'No to-do dates selected yet.'
+            });
 
             elements.prevMonth.addEventListener('click', () => {
                 const updated = new Date(state.current.getFullYear(), state.current.getMonth() - 1, 1);
@@ -121,9 +151,37 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             elements.addDeadlineButton.addEventListener('click', () => openAddModal('deadline'));
             elements.addTodoButton.addEventListener('click', () => openAddModal('todo'));
 
-            if (elements.importIcsButton && elements.icsFileInput) {
-                elements.importIcsButton.addEventListener('click', () => elements.icsFileInput.click());
-                elements.icsFileInput.addEventListener('change', handleIcsFileImport);
+            if (elements.importIcsButton && elements.importIcsModal) {
+                elements.importIcsButton.addEventListener('click', () => {
+                    elements.importIcsModal.classList.remove('hidden');
+                });
+            }
+
+            if (elements.icsFileInput) {
+                elements.icsFileInput.addEventListener('change', handleIcsFileInputChange);
+            }
+
+            if (elements.icsDropZone) {
+                elements.icsDropZone.addEventListener('click', () => {
+                    if (elements.icsFileInput) {
+                        elements.icsFileInput.click();
+                    }
+                });
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    elements.icsDropZone.addEventListener(eventName, handleIcsDragOver);
+                });
+                ['dragleave', 'dragend'].forEach(eventName => {
+                    elements.icsDropZone.addEventListener(eventName, handleIcsDragLeave);
+                });
+                elements.icsDropZone.addEventListener('drop', handleIcsDrop);
+            }
+
+            if (elements.fetchIcsLinkButton) {
+                elements.fetchIcsLinkButton.addEventListener('click', handleIcsLinkFetch);
+            }
+
+            if (elements.exportIcsButton) {
+                elements.exportIcsButton.addEventListener('click', handleIcsExport);
             }
 
             if (elements.clearAllButton) {
@@ -388,7 +446,7 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                         return a.date.localeCompare(b.date);
                     }
                     return a.time.localeCompare(b.time);
-                });
+                }).filter(deadline => !isDeadlineInPast(deadline));
 
                 elements.deadlinesContainer.innerHTML = '';
 
@@ -647,7 +705,9 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 const dateValue = formatDateForStorage(state.selected);
                 if (type === 'schedule') {
                     elements.addTaskForm.reset();
-                    document.getElementById('task-date-input').value = dateValue;
+                    if (multiDateSelectors.schedule) {
+                        multiDateSelectors.schedule.setDates([dateValue], dateValue);
+                    }
                     elements.addTaskModal.classList.remove('hidden');
                 } else if (type === 'deadline') {
                     elements.addDeadlineForm.reset();
@@ -655,7 +715,9 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                     elements.addDeadlineModal.classList.remove('hidden');
                 } else {
                     elements.addTodoForm.reset();
-                    document.getElementById('todo-date-input').value = dateValue;
+                    if (multiDateSelectors.todo) {
+                        multiDateSelectors.todo.setDates([dateValue], dateValue);
+                    }
                     elements.addTodoModal.classList.remove('hidden');
                 }
             }
@@ -686,16 +748,33 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             }
 
             function closeAllModals() {
-                [elements.addTaskModal, elements.addDeadlineModal, elements.addTodoModal, elements.editTaskModal, elements.editDeadlineModal].forEach(modal => modal.classList.add('hidden'));
+                [
+                    elements.addTaskModal,
+                    elements.addDeadlineModal,
+                    elements.addTodoModal,
+                    elements.editTaskModal,
+                    elements.editDeadlineModal,
+                    elements.importIcsModal
+                ].forEach(modal => {
+                    if (modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+                if (elements.icsDropZone) {
+                    elements.icsDropZone.classList.remove('dragging');
+                }
             }
 
             function handleAddSchedule(event) {
                 event.preventDefault();
-                const payload = {
-                    id: generateId(),
+                const selectedDates = multiDateSelectors.schedule ? multiDateSelectors.schedule.getDates() : [formatDateForStorage(state.selected)];
+                if (!selectedDates.length) {
+                    setAutomationStatus('Choose at least one valid date for your schedule.', 'error');
+                    return;
+                }
+                const basePayload = {
                     name: event.target['task-name'].value.trim(),
                     type: event.target['task-type'].value,
-                    date: event.target['task-date-input'].value,
                     startTime: event.target['start-time'].value,
                     endTime: event.target['end-time'].value,
                     location: event.target['location'].value.trim(),
@@ -703,7 +782,13 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                     link: event.target['link'].value.trim()
                 };
                 const schedules = getSchedules();
-                schedules.push(payload);
+                selectedDates.forEach(date => {
+                    schedules.push({
+                        id: generateId(),
+                        ...basePayload,
+                        date
+                    });
+                });
                 saveItems(STORAGE_KEYS.schedules, schedules);
                 closeAllModals();
                 renderAll();
@@ -728,16 +813,25 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
 
             function handleAddTodo(event) {
                 event.preventDefault();
-                const payload = {
-                    id: generateId(),
+                const selectedDates = multiDateSelectors.todo ? multiDateSelectors.todo.getDates() : [formatDateForStorage(state.selected)];
+                if (!selectedDates.length) {
+                    setAutomationStatus('Choose at least one valid date for your to-do.', 'error');
+                    return;
+                }
+                const basePayload = {
                     title: event.target['todo-title'].value.trim(),
-                    notes: event.target['todo-notes'].value.trim(),
-                    date: event.target['todo-date-input'].value,
-                    completed: false,
-                    completedAt: null
+                    notes: event.target['todo-notes'].value.trim()
                 };
                 const todos = getTodos();
-                todos.push(payload);
+                selectedDates.forEach(date => {
+                    todos.push({
+                        id: generateId(),
+                        ...basePayload,
+                        date,
+                        completed: false,
+                        completedAt: null
+                    });
+                });
                 saveItems(STORAGE_KEYS.todos, todos);
                 closeAllModals();
                 renderAll();
@@ -833,43 +927,197 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 renderAll();
             }
 
-            async function handleIcsFileImport(event) {
-                const files = event.target.files || [];
-                const file = files[0];
+            async function handleIcsFileInputChange(event) {
+                const { files } = event.target;
+                const file = files && files[0];
                 if (!file) {
                     return;
                 }
+                await importIcsFromFile(file);
+                event.target.value = '';
+            }
+
+            function handleIcsDragOver(event) {
+                event.preventDefault();
+                if (elements.icsDropZone) {
+                    elements.icsDropZone.classList.add('dragging');
+                }
+                if (event.dataTransfer) {
+                    event.dataTransfer.dropEffect = 'copy';
+                }
+            }
+
+            function handleIcsDragLeave(event) {
+                event.preventDefault();
+                if (!elements.icsDropZone) {
+                    return;
+                }
+                const related = event.relatedTarget;
+                if (!related || !elements.icsDropZone.contains(related)) {
+                    elements.icsDropZone.classList.remove('dragging');
+                }
+            }
+
+            async function handleIcsDrop(event) {
+                event.preventDefault();
+                if (elements.icsDropZone) {
+                    elements.icsDropZone.classList.remove('dragging');
+                }
+                const fileList = event.dataTransfer && event.dataTransfer.files;
+                const file = fileList && fileList[0];
+                if (file) {
+                    await importIcsFromFile(file);
+                }
+            }
+
+            async function handleIcsLinkFetch(event) {
+                event.preventDefault();
+                const url = elements.icsLinkInput ? elements.icsLinkInput.value.trim() : '';
+                if (!url) {
+                    setAutomationStatus('Paste an ICS link before fetching.', 'warning');
+                    return;
+                }
+                await importIcsFromUrl(url);
+            }
+
+            async function importIcsFromFile(file) {
                 try {
                     setAutomationStatus(`Importing ${file.name}...`, 'info');
                     const text = await file.text();
-                    const events = parseIcsEvents(text);
-                    const converted = convertIcsEventsToItems(events);
-                    if (!converted.schedules.length && !converted.deadlines.length) {
-                        setAutomationStatus('No events were detected in that ICS file.', 'warning');
-                        return;
+                    const imported = await processIcsPayload(text, file.name);
+                    if (imported && elements.importIcsModal) {
+                        elements.importIcsModal.classList.add('hidden');
                     }
-                    const schedules = getSchedules();
-                    const deadlines = getDeadlines();
-                    const scheduleResult = mergeItems(schedules, converted.schedules, getScheduleSignature);
-                    const deadlineResult = mergeItems(deadlines, converted.deadlines, getDeadlineSignature);
-                    if (scheduleResult.added > 0) {
-                        saveItems(STORAGE_KEYS.schedules, schedules);
-                    }
-                    if (deadlineResult.added > 0) {
-                        saveItems(STORAGE_KEYS.deadlines, deadlines);
-                    }
-                    if (scheduleResult.added === 0 && deadlineResult.added === 0) {
-                        setAutomationStatus('Every event in that ICS file was already on your calendar.', 'info');
-                        return;
-                    }
-                    renderAll();
-                    setAutomationStatus(`Imported ${scheduleResult.added} schedule(s) and ${deadlineResult.added} deadline(s) from ${file.name}.`, 'success');
                 } catch (error) {
                     console.error('ICS import failed', error);
                     setAutomationStatus('Unable to import that ICS file. Please verify the file and try again.', 'error');
-                } finally {
-                    event.target.value = '';
                 }
+            }
+
+            async function importIcsFromUrl(url) {
+                const trimmedUrl = (url || '').trim();
+                if (!trimmedUrl) {
+                    setAutomationStatus('Paste an ICS link before fetching.', 'warning');
+                    return;
+                }
+                let directError = null;
+                try {
+                    setAutomationStatus('Downloading ICS link...', 'info');
+                    const directContent = await fetchIcsDirect(trimmedUrl);
+                    const imported = await processIcsPayload(directContent, trimmedUrl);
+                    if (imported && elements.importIcsModal) {
+                        elements.importIcsModal.classList.add('hidden');
+                    }
+                    return;
+                } catch (error) {
+                    directError = error;
+                    console.warn('Direct ICS download failed, attempting fallback.', error);
+                }
+                try {
+                    setAutomationStatus('Retrying via local proxy...', 'info');
+                    const proxyContent = await fetchIcsViaProxy(trimmedUrl);
+                    const imported = await processIcsPayload(proxyContent, trimmedUrl);
+                    if (imported && elements.importIcsModal) {
+                        elements.importIcsModal.classList.add('hidden');
+                    }
+                } catch (fallbackError) {
+                    console.error('ICS link import failed', fallbackError, directError);
+                    setAutomationStatus('Unable to download that ICS link automatically. Download it manually and drag it into the import box instead.', 'error');
+                }
+            }
+
+            async function fetchIcsDirect(url) {
+                const response = await fetch(url, { credentials: 'omit' });
+                if (!response.ok) {
+                    throw new Error(`Direct download failed with status ${response.status}`);
+                }
+                const text = await response.text();
+                if (!text.trim()) {
+                    throw new Error('The downloaded ICS file was empty.');
+                }
+                return text;
+            }
+
+            async function fetchIcsViaProxy(url) {
+                const response = await fetch('php/api.php?endpoint=ics-fetch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url })
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Proxy download failed with ${response.status}: ${errorText.slice(0, 160)}`);
+                }
+                const payload = await response.json();
+                if (!payload.success || !payload.data || typeof payload.data.content !== 'string') {
+                    throw new Error(payload.error || 'The proxy returned an unexpected response.');
+                }
+                return payload.data.content;
+            }
+
+            async function processIcsPayload(text, sourceLabel = 'ICS file') {
+                const components = parseIcsComponents(text);
+                const converted = convertIcsComponentsToItems(components);
+                if (!converted.schedules.length && !converted.deadlines.length && !converted.todos.length) {
+                    setAutomationStatus('No events were detected in that ICS data.', 'warning');
+                    return false;
+                }
+                const schedules = getSchedules();
+                const deadlines = getDeadlines();
+                const todos = getTodos();
+                const scheduleResult = mergeItems(schedules, converted.schedules, getScheduleSignature);
+                const deadlineResult = mergeItems(deadlines, converted.deadlines, getDeadlineSignature);
+                const todoResult = mergeItems(todos, converted.todos, getTodoSignature);
+                if (scheduleResult.added > 0) {
+                    saveItems(STORAGE_KEYS.schedules, schedules);
+                }
+                if (deadlineResult.added > 0) {
+                    saveItems(STORAGE_KEYS.deadlines, deadlines);
+                }
+                if (todoResult.added > 0) {
+                    saveItems(STORAGE_KEYS.todos, todos);
+                }
+                if (scheduleResult.added === 0 && deadlineResult.added === 0 && todoResult.added === 0) {
+                    setAutomationStatus('Every event in that ICS data was already on your calendar.', 'info');
+                    return false;
+                }
+                renderAll();
+                setAutomationStatus(`Imported ${scheduleResult.added} schedule(s), ${deadlineResult.added} deadline(s), and ${todoResult.added} to-do(s) from ${truncateSourceLabel(sourceLabel)}.`, 'success');
+                if (elements.icsLinkInput) {
+                    elements.icsLinkInput.value = '';
+                }
+                return true;
+            }
+
+            function handleIcsExport() {
+                const schedules = getSchedules();
+                const deadlines = getDeadlines();
+                const todos = getTodos();
+                if (!schedules.length && !deadlines.length && !todos.length) {
+                    setAutomationStatus('Nothing to export yet. Add some schedules, deadlines, or to-dos first.', 'warning');
+                    return;
+                }
+                const icsContent = buildIcsExport({ schedules, deadlines, todos });
+                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `calendar-web-${formatDateForStorage(new Date()).replace(/-/g, '')}.ics`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                setAutomationStatus('Exported your planner to an ICS file.', 'success');
+            }
+
+            function truncateSourceLabel(label) {
+                if (!label) {
+                    return 'ICS';
+                }
+                const trimmed = label.trim();
+                return trimmed.length > 40 ? `${trimmed.slice(0, 37)}...` : trimmed;
             }
 
             function handleClearAll() {
@@ -1495,6 +1743,23 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             return { added };
         }
 
+        function isDeadlineInPast(deadline) {
+            if (!deadline || !deadline.date) {
+                return false;
+            }
+            const timePart = deadline.time && deadline.time.trim() ? deadline.time : '23:59';
+            const deadlineMoment = new Date(`${deadline.date}T${timePart}`);
+            if (Number.isNaN(deadlineMoment.getTime())) {
+                return false;
+            }
+            return deadlineMoment < new Date();
+        }
+
+        function disableCanvasCredentials() {
+            localStorage.removeItem(CANVAS_BASE_URL_KEY);
+            localStorage.removeItem(CANVAS_TOKEN_KEY);
+        }
+
         function getScheduleSignature(item) {
             if (item.source && item.sourceId) {
                 return `${item.source}:${item.sourceId}`;
@@ -1509,27 +1774,49 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             return `${item.name}|${item.date}|${item.time}`;
         }
 
-        function parseIcsEvents(rawText) {
+        function getTodoSignature(item) {
+            if (item.source && item.sourceId) {
+                return `${item.source}:${item.sourceId}`;
+            }
+            return `${item.title}|${item.date}|${item.notes || ''}`;
+        }
+
+        function parseIcsComponents(rawText) {
             if (!rawText) {
                 return [];
             }
             const unfolded = rawText.replace(/\r\n/g, '\n').replace(/\n[ \t]/g, '');
             const lines = unfolded.split(/\n+/);
-            const events = [];
-            let current = null;
+            const stack = [];
+            const components = [];
             lines.forEach(line => {
-                if (line === 'BEGIN:VEVENT') {
-                    current = {};
+                if (!line) {
                     return;
                 }
-                if (line === 'END:VEVENT') {
-                    if (current) {
-                        events.push(current);
-                        current = null;
+                if (line.startsWith('BEGIN:')) {
+                    const type = line.slice(6).toUpperCase();
+                    if (type === 'VEVENT' || type === 'VTODO') {
+                        stack.push({ type, data: { component: type } });
+                    } else if (stack.length) {
+                        stack.push({ type, data: null });
                     }
                     return;
                 }
-                if (!current) {
+                if (line.startsWith('END:')) {
+                    const type = line.slice(4).toUpperCase();
+                    while (stack.length) {
+                        const current = stack.pop();
+                        if (current.type === type) {
+                            if (current.data) {
+                                components.push(current.data);
+                            }
+                            break;
+                        }
+                    }
+                    return;
+                }
+                const current = stack[stack.length - 1];
+                if (!current || !current.data) {
                     return;
                 }
                 const separatorIndex = line.indexOf(':');
@@ -1539,53 +1826,403 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 const keyPart = line.slice(0, separatorIndex);
                 const value = line.slice(separatorIndex + 1);
                 const key = keyPart.split(';')[0].toUpperCase();
-                current[key] = value;
+                current.data[key] = value;
             });
-            return events;
+            return components;
         }
 
-        function convertIcsEventsToItems(events) {
+        function convertIcsComponentsToItems(components) {
             const schedules = [];
             const deadlines = [];
-            events.forEach(event => {
-                const summary = decodeIcsText(event.SUMMARY || 'Untitled Event');
-                const description = stripHtml(decodeIcsText(event.DESCRIPTION || ''));
-                const location = decodeIcsText(event.LOCATION || '');
-                const uid = event.UID || event['X-WR-UID'] || `${summary}-${event.DTSTART || ''}`;
-                const start = parseIcsDate(event.DTSTART);
-                const end = parseIcsDate(event.DTEND) || start;
-                if (!start) {
-                    return;
-                }
-                const isAllDay = event.DTSTART && event.DTSTART.length === 8;
-                if (isAllDay) {
-                    deadlines.push({
+            const todos = [];
+            components.forEach(component => {
+                if (component.component === 'VEVENT') {
+                    const summary = decodeIcsText(component.SUMMARY || 'Untitled Event');
+                    const description = stripHtml(decodeIcsText(component.DESCRIPTION || ''));
+                    const location = decodeIcsText(component.LOCATION || '');
+                    const link = decodeIcsText(component.URL || '');
+                    const uid = component.UID || component['X-WR-UID'] || `${summary}-${component.DTSTART || ''}`;
+                    const start = parseIcsDate(component.DTSTART);
+                    const end = parseIcsDate(component.DTEND) || start;
+                    if (!start) {
+                        return;
+                    }
+                    const dtStartRaw = component.DTSTART || '';
+                    const isAllDay = dtStartRaw.length === 8 && !dtStartRaw.includes('T');
+                    const kindOverride = (component[ICS_KIND_FIELD] || '').toUpperCase();
+                    const treatAsDeadline = kindOverride === ICS_KIND.deadline || (!kindOverride && isAllDay);
+                    if (treatAsDeadline) {
+                        deadlines.push({
+                            id: generateId(),
+                            name: summary,
+                            date: formatDateForStorage(start),
+                            time: isAllDay ? '23:59' : formatTimeFromDate(start),
+                            description,
+                            link,
+                            source: 'ics',
+                            sourceId: uid
+                        });
+                        return;
+                    }
+                    schedules.push({
                         id: generateId(),
                         name: summary,
+                        type: 'other',
                         date: formatDateForStorage(start),
-                        time: '23:59',
+                        startTime: formatTimeFromDate(start),
+                        endTime: formatTimeFromDate(end || start),
+                        location,
                         description,
-                        link: '',
+                        link,
                         source: 'ics',
                         sourceId: uid
                     });
                     return;
                 }
-                schedules.push({
-                    id: generateId(),
-                    name: summary,
-                    type: 'other',
-                    date: formatDateForStorage(start),
-                    startTime: formatTimeFromDate(start),
-                    endTime: formatTimeFromDate(end || start),
-                    location,
-                    description,
-                    link: '',
-                    source: 'ics',
-                    sourceId: uid
-                });
+                if (component.component === 'VTODO') {
+                    const summary = decodeIcsText(component.SUMMARY || 'To-Do');
+                    const notes = stripHtml(decodeIcsText(component.DESCRIPTION || ''));
+                    const uid = component.UID || `${summary}-${component.DUE || ''}`;
+                    const due = parseIcsDate(component.DUE) || parseIcsDate(component.DTSTART) || new Date();
+                    const completedAtDate = parseIcsDate(component.COMPLETED);
+                    const status = (component.STATUS || '').toUpperCase();
+                    todos.push({
+                        id: generateId(),
+                        title: summary,
+                        notes,
+                        date: formatDateForStorage(due),
+                        completed: status === 'COMPLETED',
+                        completedAt: completedAtDate ? completedAtDate.getTime() : null,
+                        source: 'ics',
+                        sourceId: uid
+                    });
+                }
             });
-            return { schedules, deadlines };
+            return { schedules, deadlines, todos };
+        }
+
+        function buildIcsExport({ schedules = [], deadlines = [], todos = [] }) {
+            const stamp = formatDateTimeForICS(new Date());
+            const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CalendarWeb//EN'];
+            schedules.forEach(schedule => {
+                lines.push(...createScheduleEventLines(schedule, stamp));
+            });
+            deadlines.forEach(deadline => {
+                lines.push(...createDeadlineEventLines(deadline, stamp));
+            });
+            todos.forEach(todo => {
+                lines.push(...createTodoLines(todo, stamp));
+            });
+            lines.push('END:VCALENDAR');
+            return lines.map(foldIcsLine).join('\r\n');
+        }
+
+        function createScheduleEventLines(schedule, stamp) {
+            const start = combineDateTime(schedule.date, schedule.startTime || '09:00');
+            const end = combineDateTime(schedule.date, schedule.endTime || schedule.startTime || '10:00') || start;
+            return [
+                'BEGIN:VEVENT',
+                `UID:schedule-${schedule.id || generateId()}`,
+                `DTSTAMP:${stamp}`,
+                start ? `DTSTART:${formatDateTimeForICS(start)}` : null,
+                end ? `DTEND:${formatDateTimeForICS(end)}` : null,
+                `SUMMARY:${escapeIcsText(schedule.name || 'Schedule Item')}`,
+                `${ICS_KIND_FIELD}:${ICS_KIND.schedule}`,
+                schedule.location ? `LOCATION:${escapeIcsText(schedule.location)}` : null,
+                schedule.description ? `DESCRIPTION:${escapeIcsText(schedule.description)}` : null,
+                schedule.link ? `URL:${escapeIcsText(schedule.link)}` : null,
+                'END:VEVENT'
+            ].filter(Boolean);
+        }
+
+        function createDeadlineEventLines(deadline, stamp) {
+            const start = combineDateTime(deadline.date, deadline.time || '23:59');
+            const end = start ? addMinutes(start, 30) : null;
+            return [
+                'BEGIN:VEVENT',
+                `UID:deadline-${deadline.id || generateId()}`,
+                `DTSTAMP:${stamp}`,
+                start ? `DTSTART:${formatDateTimeForICS(start)}` : null,
+                end ? `DTEND:${formatDateTimeForICS(end)}` : null,
+                `SUMMARY:${escapeIcsText(deadline.name || 'Deadline')}`,
+                `${ICS_KIND_FIELD}:${ICS_KIND.deadline}`,
+                deadline.description ? `DESCRIPTION:${escapeIcsText(deadline.description)}` : null,
+                deadline.link ? `URL:${escapeIcsText(deadline.link)}` : null,
+                'END:VEVENT'
+            ].filter(Boolean);
+        }
+
+        function createTodoLines(todo, stamp) {
+            const dueDate = parseLocalDateString(todo.date);
+            return [
+                'BEGIN:VTODO',
+                `UID:todo-${todo.id || generateId()}`,
+                `DTSTAMP:${stamp}`,
+                dueDate ? `DUE;VALUE=DATE:${formatDateForICS(dueDate)}` : null,
+                `SUMMARY:${escapeIcsText(todo.title || 'To-Do')}`,
+                `${ICS_KIND_FIELD}:${ICS_KIND.todo}`,
+                todo.notes ? `DESCRIPTION:${escapeIcsText(todo.notes)}` : null,
+                todo.completed ? 'STATUS:COMPLETED' : 'STATUS:NEEDS-ACTION',
+                todo.completed && todo.completedAt ? `COMPLETED:${formatDateTimeForICS(new Date(todo.completedAt))}` : null,
+                'END:VTODO'
+            ].filter(Boolean);
+        }
+
+        function formatDateTimeForICS(date) {
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+                return formatDateTimeForICS(new Date());
+            }
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+        }
+
+        function formatDateForICS(date) {
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+                return formatDateForICS(new Date());
+            }
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}${month}${day}`;
+        }
+
+        function escapeIcsText(value = '') {
+            return value
+                .replace(/\\/g, '\\\\')
+                .replace(/;/g, '\\;')
+                .replace(/,/g, '\\,')
+                .replace(/\r?\n/g, '\\n');
+        }
+
+        function foldIcsLine(line) {
+            const chunkSize = 74;
+            if (!line || line.length <= chunkSize) {
+                return line || '';
+            }
+            const parts = [];
+            for (let i = 0; i < line.length; i += chunkSize) {
+                const chunk = line.slice(i, i + chunkSize);
+                parts.push(i === 0 ? chunk : ` ${chunk}`);
+            }
+            return parts.join('\r\n');
+        }
+
+        function combineDateTime(dateString, timeString) {
+            const base = parseLocalDateString(dateString);
+            if (!base) {
+                return null;
+            }
+            const [hours = '00', minutes = '00'] = (timeString || '00:00').split(':');
+            base.setHours(Number(hours), Number(minutes), 0, 0);
+            return base;
+        }
+
+        function addMinutes(date, minutes) {
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+                return null;
+            }
+            return new Date(date.getTime() + minutes * 60000);
+        }
+
+        function createCalendarDateSelector({ hiddenInputId, listContainerId, pickerContainerId, toneSetter = () => {}, emptyMessage = 'No dates selected yet.' }) {
+            const hiddenInput = document.getElementById(hiddenInputId);
+            const listContainer = document.getElementById(listContainerId);
+            const pickerContainer = document.getElementById(pickerContainerId);
+            const today = normaliseDate(new Date());
+            const state = {
+                dates: [],
+                view: new Date(today.getFullYear(), today.getMonth(), 1)
+            };
+
+            const updateHiddenInput = () => {
+                if (hiddenInput) {
+                    hiddenInput.value = JSON.stringify(state.dates);
+                }
+            };
+
+            const setViewForDate = (dateInput) => {
+                const parsed = typeof dateInput === 'string' ? parseLocalDateString(dateInput) : dateInput;
+                if (!parsed || Number.isNaN(parsed.getTime())) {
+                    return;
+                }
+                state.view = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+            };
+
+            const renderSelected = () => {
+                if (!listContainer) {
+                    return;
+                }
+                if (!state.dates.length) {
+                    listContainer.innerHTML = `<span class="text-xs text-gray-500 dark:text-gray-400">${emptyMessage}</span>`;
+                    return;
+                }
+                listContainer.innerHTML = '';
+                state.dates.forEach(date => {
+                    const pill = document.createElement('span');
+                    pill.className = 'inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200';
+                    pill.textContent = date;
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.className = 'text-gray-500 hover:text-red-500';
+                    removeButton.innerHTML = '&times;';
+                    removeButton.setAttribute('data-remove-date', date);
+                    removeButton.setAttribute('aria-label', `Remove ${date}`);
+                    pill.appendChild(removeButton);
+                    listContainer.appendChild(pill);
+                });
+            };
+
+            const renderPicker = () => {
+                if (!pickerContainer) {
+                    return;
+                }
+                pickerContainer.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'mini-date-picker';
+
+                const header = document.createElement('div');
+                header.className = 'mini-date-picker__header';
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = 'mini-date-picker__nav-btn';
+                prevBtn.innerHTML = '<i class="fa fa-chevron-left" aria-hidden="true"></i>';
+                prevBtn.addEventListener('click', () => {
+                    state.view = new Date(state.view.getFullYear(), state.view.getMonth() - 1, 1);
+                    renderPicker();
+                });
+
+                const label = document.createElement('span');
+                label.className = 'mini-date-picker__label';
+                label.textContent = `${MONTH_NAMES[state.view.getMonth()]} ${state.view.getFullYear()}`;
+
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = 'mini-date-picker__nav-btn';
+                nextBtn.innerHTML = '<i class="fa fa-chevron-right" aria-hidden="true"></i>';
+                nextBtn.addEventListener('click', () => {
+                    state.view = new Date(state.view.getFullYear(), state.view.getMonth() + 1, 1);
+                    renderPicker();
+                });
+
+                header.appendChild(prevBtn);
+                header.appendChild(label);
+                header.appendChild(nextBtn);
+
+                const weekdayRow = document.createElement('div');
+                weekdayRow.className = 'mini-date-picker__weekdays';
+                ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(day => {
+                    const span = document.createElement('span');
+                    span.textContent = day;
+                    weekdayRow.appendChild(span);
+                });
+
+                const grid = document.createElement('div');
+                grid.className = 'mini-date-picker__grid';
+                const firstDayOffset = new Date(state.view.getFullYear(), state.view.getMonth(), 1).getDay();
+                const daysInMonth = new Date(state.view.getFullYear(), state.view.getMonth() + 1, 0).getDate();
+                for (let i = 0; i < firstDayOffset; i += 1) {
+                    const placeholder = document.createElement('span');
+                    grid.appendChild(placeholder);
+                }
+                const todayValue = formatDateForStorage(normaliseDate(new Date()));
+                for (let day = 1; day <= daysInMonth; day += 1) {
+                    const date = new Date(state.view.getFullYear(), state.view.getMonth(), day);
+                    const dateValue = formatDateForStorage(date);
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'mini-date-picker__day';
+                    if (state.dates.includes(dateValue)) {
+                        button.classList.add('is-selected');
+                        button.setAttribute('aria-pressed', 'true');
+                    } else {
+                        button.setAttribute('aria-pressed', 'false');
+                    }
+                    if (dateValue === todayValue) {
+                        button.classList.add('is-today');
+                    }
+                    button.textContent = day;
+                    button.title = `Toggle ${formatReadableDate(date)}`;
+                    button.addEventListener('click', () => {
+                        toggleDate(dateValue);
+                    });
+                    grid.appendChild(button);
+                }
+
+                wrapper.appendChild(header);
+                wrapper.appendChild(weekdayRow);
+                wrapper.appendChild(grid);
+                pickerContainer.appendChild(wrapper);
+            };
+
+            const setDates = (dates = [], anchorDate = null) => {
+                state.dates = dedupeAndSortDates(dates);
+                updateHiddenInput();
+                if (anchorDate) {
+                    setViewForDate(anchorDate);
+                } else if (state.dates.length) {
+                    setViewForDate(state.dates[0]);
+                }
+                renderSelected();
+                renderPicker();
+            };
+
+            const toggleDate = (dateValue) => {
+                if (!dateValue) {
+                    return;
+                }
+                if (state.dates.includes(dateValue)) {
+                    state.dates = state.dates.filter(date => date !== dateValue);
+                } else {
+                    state.dates = dedupeAndSortDates([...state.dates, dateValue]);
+                }
+                updateHiddenInput();
+                renderSelected();
+                renderPicker();
+            };
+
+            if (listContainer) {
+                listContainer.addEventListener('click', event => {
+                    const target = event.target.closest('[data-remove-date]');
+                    if (!target) {
+                        return;
+                    }
+                    const dateToRemove = target.getAttribute('data-remove-date');
+                    if (!dateToRemove) {
+                        return;
+                    }
+                    state.dates = state.dates.filter(date => date !== dateToRemove);
+                    updateHiddenInput();
+                    renderSelected();
+                    renderPicker();
+                });
+            }
+
+            setDates([]);
+
+            return {
+                setDates,
+                getDates: () => state.dates.slice()
+            };
+        }
+
+        function dedupeAndSortDates(dates = []) {
+            return Array.from(new Set((dates || []).filter(Boolean))).sort();
+        }
+
+        function parseLocalDateString(dateString) {
+            if (!dateString) {
+                return null;
+            }
+            const [year, month, day] = dateString.split('-').map(Number);
+            if (!year || !month || !day) {
+                return null;
+            }
+            return new Date(year, month - 1, day);
         }
 
         function parseIcsDate(value) {

@@ -105,6 +105,10 @@ function handlePost($endpoint) {
         case 'canvas-events':
             handleCanvasEventsRequest($data ?: []);
             break;
+
+        case 'ics-fetch':
+            handleIcsFetchRequest($data ?: []);
+            break;
             
         default:
             respondWithError('Endpoint not found', 404);
@@ -210,6 +214,42 @@ function handleCanvasEventsRequest(array $payload) {
     }
 
     respondWithSuccess($decoded);
+}
+
+function handleIcsFetchRequest(array $payload) {
+    $url = isset($payload['url']) ? trim($payload['url']) : '';
+    if ($url === '') {
+        respondWithError('Please provide an ICS URL to fetch.', 422);
+    }
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        respondWithError('The ICS URL provided is invalid.', 422);
+    }
+    $scheme = strtolower(parse_url($url, PHP_URL_SCHEME) ?: '');
+    if (!in_array($scheme, ['http', 'https'], true)) {
+        respondWithError('Only HTTP and HTTPS ICS links are supported.', 422);
+    }
+
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+    curl_setopt($curl, CURLOPT_USERAGENT, 'CalendarWeb ICS Fetcher/1.0');
+
+    $response = curl_exec($curl);
+    if ($response === false) {
+        $error = curl_error($curl);
+        curl_close($curl);
+        respondWithError('Unable to download ICS file: ' . $error, 500);
+    }
+
+    $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+
+    if ($status < 200 || $status >= 300) {
+        respondWithError('ICS link responded with ' . $status . ': ' . substr($response, 0, 300), $status);
+    }
+
+    respondWithSuccess(['content' => $response]);
 }
 
 function normalise_base_url($url) {

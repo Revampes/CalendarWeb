@@ -25,16 +25,15 @@
                             900: '#312e81'
                         },
                         secondary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e'
+                            100: '#cffafe',
+                            200: '#a5f3fc',
+                            300: '#67e8f9',
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0e7490',
+                            700: '#155e75',
+                            800: '#164e63',
+                            900: '#083344'
                         },
                         task: {
                             lecture: '#3b82f6',
@@ -115,6 +114,7 @@
             border: 1px solid rgba(148, 163, 184, 0.3);
             background: rgba(255, 255, 255, 0.85);
             transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            overflow: hidden;
         }
 
         .calendar-day-cell:hover {
@@ -203,11 +203,168 @@
             text-decoration: line-through;
         }
 
+        .mini-date-picker {
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .mini-date-picker-container {
+            width: 100%;
+        }
+
+        .dark .mini-date-picker {
+            border-color: rgba(71, 85, 105, 0.6);
+            background: rgba(15, 23, 42, 0.75);
+        }
+
+        .mini-date-picker__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.45rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .mini-date-picker__label {
+            flex: 1;
+            text-align: center;
+        }
+
+        .dark .mini-date-picker__header {
+            color: #e2e8f0;
+        }
+
+        .mini-date-picker__nav-btn {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: transparent;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .mini-date-picker__nav-btn:hover {
+            background: rgba(99, 102, 241, 0.12);
+        }
+
+        .dark .mini-date-picker__nav-btn {
+            border-color: rgba(71, 85, 105, 0.6);
+        }
+
+        .mini-date-picker__weekdays,
+        .mini-date-picker__grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.25rem;
+            text-align: center;
+        }
+
+        .mini-date-picker__weekdays {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        .dark .mini-date-picker__weekdays {
+            color: #cbd5f5;
+        }
+
+        .mini-date-picker__grid {
+            font-size: 0.85rem;
+        }
+
+        .mini-date-picker__grid span {
+            min-height: 2rem;
+        }
+
+        .mini-date-picker__day {
+            width: 100%;
+            min-height: 2.2rem;
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #1f2937;
+            font-weight: 500;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .mini-date-picker__day:hover,
+        .mini-date-picker__day:focus-visible {
+            background: rgba(79, 70, 229, 0.1);
+            border-color: rgba(79, 70, 229, 0.4);
+            outline: none;
+        }
+
+        .mini-date-picker__day.is-selected {
+            background: rgba(79, 70, 229, 0.2);
+            border-color: rgba(79, 70, 229, 0.6);
+            color: #1f1b4b;
+        }
+
+        .mini-date-picker__day.is-today {
+            color: #2563eb;
+            font-weight: 700;
+        }
+
+        .dark .mini-date-picker__day {
+            color: #e2e8f0;
+        }
+
+        .dark .mini-date-picker__day.is-selected {
+            background: rgba(129, 140, 248, 0.35);
+            border-color: rgba(129, 140, 248, 0.7);
+            color: #f8fafc;
+        }
+
+        .dark .mini-date-picker__day.is-today {
+            color: #a5b4fc;
+        }
+
         .modal {
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: rgba(0, 0, 0, 0.55);
+        }
+
+        .ics-drop-zone {
+            border: 2px dashed rgba(99, 102, 241, 0.4);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            background: rgba(99, 102, 241, 0.04);
+            transition: border-color 0.2s ease, background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .dark .ics-drop-zone {
+            border-color: rgba(129, 140, 248, 0.5);
+            background: rgba(79, 70, 229, 0.12);
+        }
+
+        .ics-drop-zone.dragging {
+            border-color: rgba(79, 70, 229, 0.9);
+            background: rgba(129, 140, 248, 0.15);
+        }
+
+        @media (max-width: 640px) {
+            .calendar-day-cell {
+                min-height: auto;
+                aspect-ratio: 1 / 1;
+                padding: 0.75rem 0.5rem;
+            }
+
+            .calendar-day-meta {
+                margin-top: 0.25rem;
+            }
         }
     </style>
 </head>
@@ -267,17 +424,16 @@
                             <i class="fa fa-upload" aria-hidden="true"></i>
                             Import ICS
                         </button>
-                        <button id="sync-canvas-btn" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-lg bg-secondary-600 hover:bg-secondary-700 text-white transition-colors">
-                            <i class="fa fa-refresh" aria-hidden="true"></i>
-                            Sync Canvas
+                        <button id="export-ics-btn" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <i class="fa fa-download" aria-hidden="true"></i>
+                            Export ICS
                         </button>
                         <button id="clear-all-btn" class="inline-flex items-center gap-2 py-2.5 px-4 rounded-lg border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                             <i class="fa fa-trash" aria-hidden="true"></i>
                             Clear All
                         </button>
                     </div>
-                    <input id="ics-file-input" type="file" accept=".ics,text/calendar" class="hidden" />
-                    <p id="automation-status" class="text-sm text-gray-500 dark:text-gray-400 mt-2">Connect Canvas or import an ICS file to keep this planner in sync.</p>
+                    <p id="automation-status" class="text-sm text-gray-500 dark:text-gray-400 mt-2">Import an ICS file or paste an ICS link to keep this planner in sync.</p>
                 </div>
                 <div class="grid gap-6 mt-6 xl:grid-cols-[1.5fr,1fr]">
                     <div class="space-y-6">
@@ -363,42 +519,13 @@
                     </div>
                 </div>
 
-                <section class="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Canvas Credentials</h2>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Save your Canvas base URL and API token locally (stored only in this browser) before running a sync.</p>
-                        </div>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <label for="canvas-base-url-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Canvas Base URL</label>
-                            <input type="url" id="canvas-base-url-input" placeholder="https://canvas.example.edu" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
-                        </div>
-                        <div class="relative">
-                            <label for="canvas-token-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Token</label>
-                            <input type="password" id="canvas-token-input" placeholder="Paste your token" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 pr-24 focus:outline-none focus:ring-primary-500 focus:border-primary-500" autocomplete="off" />
-                            <button type="button" id="toggle-token-visibility" class="absolute inset-y-0 right-2 my-auto px-3 py-1 text-xs font-semibold rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Show</button>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-3 mt-4">
-                        <button id="save-canvas-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">
-                            <i class="fa fa-floppy-o" aria-hidden="true"></i>
-                            Save Credentials
-                        </button>
-                        <button id="clear-canvas-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <i class="fa fa-eraser" aria-hidden="true"></i>
-                            Clear Credentials
-                        </button>
-                    </div>
-                </section>
             </section>
         </div>
     </main>
 
     <!-- Add Schedule Modal -->
     <div id="add-task-modal" class="modal fixed inset-0 hidden items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md animate-fade-in">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto scrollbar-thin animate-fade-in">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Add Schedule Item</h3>
                 <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Close modal">
@@ -411,23 +538,33 @@
                     <label for="task-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
                     <input type="text" id="task-name" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                    <select id="task-type" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
+                        <option value="lecture">Lecture</option>
+                        <option value="tutorial">Tutorial</option>
+                        <option value="training">Training</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="assignment">Assignment</option>
+                        <option value="exam">Exam</option>
+                        <option value="break">Break</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="space-y-3">
                     <div>
-                        <label for="task-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <select id="task-type" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
-                            <option value="lecture">Lecture</option>
-                            <option value="tutorial">Tutorial</option>
-                            <option value="training">Training</option>
-                            <option value="meeting">Meeting</option>
-                            <option value="assignment">Assignment</option>
-                            <option value="exam">Exam</option>
-                            <option value="break">Break</option>
-                            <option value="other">Other</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dates</label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Tap the mini calendar to the right (or below on mobile) to add specific days.</p>
                     </div>
-                    <div>
-                        <label for="task-date-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                        <input type="date" id="task-date-input" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1 space-y-2">
+                            <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Selected days</p>
+                            <input type="hidden" id="task-dates-hidden" value="[]">
+                            <div id="task-selected-dates" class="flex flex-wrap gap-2 text-sm"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div id="task-date-picker" class="mini-date-picker-container" aria-label="Select schedule dates"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
@@ -520,15 +657,60 @@
                     <label for="todo-notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (optional)</label>
                     <textarea id="todo-notes" rows="3" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"></textarea>
                 </div>
-                <div>
-                    <label for="todo-date-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                    <input type="date" id="todo-date-input" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500" required>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dates</label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Pick each day this to-do should appear by tapping the mini calendar.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1 space-y-2">
+                            <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Selected days</p>
+                            <input type="hidden" id="todo-dates-hidden" value="[]">
+                            <div id="todo-selected-dates" class="flex flex-wrap gap-2 text-sm"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div id="todo-date-picker" class="mini-date-picker-container" aria-label="Select to-do dates"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" class="close-modal px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
                     <button type="submit" class="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors">Add To-Do</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Import ICS Modal -->
+    <div id="import-ics-modal" class="modal fixed inset-0 hidden items-center justify-center z-50 px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-lg animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Import ICS Events</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Drag a calendar file here or paste a direct ICS link.</p>
+                </div>
+                <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Close modal">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="space-y-5">
+                <div id="ics-drop-zone" class="ics-drop-zone">
+                    <div class="text-primary-600 dark:text-primary-400 text-2xl mb-2">
+                        <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+                    </div>
+                    <p class="font-semibold text-gray-800 dark:text-gray-100">Drag & drop your .ics file</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">or click to browse your device</p>
+                </div>
+                <input id="ics-file-input" type="file" accept=".ics,text/calendar" class="hidden" />
+                <div>
+                    <label for="ics-link-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ICS Link</label>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="url" id="ics-link-input" placeholder="https://example.com/calendar.ics" class="flex-1 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                        <button type="button" id="fetch-ics-link-btn" class="px-4 py-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors">Fetch Events</button>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Paste a direct download link (for example from Canvas) to import without saving the file locally.</p>
+                </div>
+            </div>
         </div>
     </div>
 
