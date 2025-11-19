@@ -7,6 +7,8 @@ const STORAGE_KEYS = {
 
 const CANVAS_TOKEN_KEY = 'canvas_api_token';
 const CANVAS_BASE_URL_KEY = 'canvas_base_url';
+const DEFAULT_CANVAS_BASE_URL = 'https://canvas.instructure.com/';
+const CANVAS_BASE_PLACEHOLDER = 'Optional (defaults to canvas.instructure.com)';
 const DAILY_REMINDER_KEY = 'calendar_daily_reminder_shown';
 const REMINDER_LOOKAHEAD_DAYS = 1;
 const DATA_SEEDED_FLAG = 'calendar_seeded';
@@ -895,7 +897,9 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
 
             function initialiseCanvasSettings() {
                 if (elements.canvasBaseUrlInput) {
-                    elements.canvasBaseUrlInput.value = localStorage.getItem(CANVAS_BASE_URL_KEY) || '';
+                    const storedBaseUrl = localStorage.getItem(CANVAS_BASE_URL_KEY) || '';
+                    elements.canvasBaseUrlInput.value = storedBaseUrl;
+                    elements.canvasBaseUrlInput.placeholder = CANVAS_BASE_PLACEHOLDER;
                 }
                 if (elements.canvasTokenInput) {
                     const hasToken = Boolean(localStorage.getItem(CANVAS_TOKEN_KEY));
@@ -907,10 +911,21 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             function handleSaveCanvasSettings() {
                 const baseInput = elements.canvasBaseUrlInput ? elements.canvasBaseUrlInput.value.trim() : '';
                 const tokenInput = elements.canvasTokenInput ? elements.canvasTokenInput.value.trim() : '';
+                let changed = false;
                 if (baseInput) {
                     const normalized = normaliseBaseUrl(baseInput);
                     localStorage.setItem(CANVAS_BASE_URL_KEY, normalized);
                     elements.canvasBaseUrlInput.value = normalized;
+                    changed = true;
+                } else if (localStorage.getItem(CANVAS_BASE_URL_KEY)) {
+                    localStorage.removeItem(CANVAS_BASE_URL_KEY);
+                    if (elements.canvasBaseUrlInput) {
+                        elements.canvasBaseUrlInput.value = '';
+                    }
+                    changed = true;
+                }
+                if (elements.canvasBaseUrlInput) {
+                    elements.canvasBaseUrlInput.placeholder = CANVAS_BASE_PLACEHOLDER;
                 }
                 if (tokenInput) {
                     localStorage.setItem(CANVAS_TOKEN_KEY, tokenInput);
@@ -920,8 +935,9 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                     if (elements.toggleTokenVisibilityButton) {
                         elements.toggleTokenVisibilityButton.textContent = 'Show';
                     }
+                    changed = true;
                 }
-                if (!baseInput && !tokenInput) {
+                if (!changed) {
                     setAutomationStatus('Enter a Canvas base URL or API token before saving.', 'warning');
                     return;
                 }
@@ -933,6 +949,7 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 localStorage.removeItem(CANVAS_TOKEN_KEY);
                 if (elements.canvasBaseUrlInput) {
                     elements.canvasBaseUrlInput.value = '';
+                    elements.canvasBaseUrlInput.placeholder = CANVAS_BASE_PLACEHOLDER;
                 }
                 if (elements.canvasTokenInput) {
                     elements.canvasTokenInput.value = '';
@@ -947,7 +964,8 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
 
             function getCanvasBaseUrl() {
                 const typed = elements.canvasBaseUrlInput ? elements.canvasBaseUrlInput.value.trim() : '';
-                return typed || localStorage.getItem(CANVAS_BASE_URL_KEY) || '';
+                const stored = localStorage.getItem(CANVAS_BASE_URL_KEY) || '';
+                return typed || stored || DEFAULT_CANVAS_BASE_URL;
             }
 
             function getCanvasToken() {
@@ -969,15 +987,22 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             }
 
             async function handleCanvasSync() {
-                const baseUrl = normaliseBaseUrl(getCanvasBaseUrl());
+                const typedBase = elements.canvasBaseUrlInput ? elements.canvasBaseUrlInput.value.trim() : '';
+                const storedBase = localStorage.getItem(CANVAS_BASE_URL_KEY) || '';
+                const usingDefaultBase = !typedBase && !storedBase;
+                const baseUrl = normaliseBaseUrl(typedBase || storedBase || DEFAULT_CANVAS_BASE_URL);
                 const typedToken = elements.canvasTokenInput ? elements.canvasTokenInput.value.trim() : '';
                 const token = typedToken || getCanvasToken();
-                if (!baseUrl || !token) {
-                    setAutomationStatus('Save your Canvas base URL and API token before syncing.', 'error');
+                if (!token) {
+                    setAutomationStatus('Enter your Canvas API token before syncing.', 'error');
                     return;
                 }
-                if (elements.canvasBaseUrlInput) {
+                if (!usingDefaultBase && elements.canvasBaseUrlInput) {
                     elements.canvasBaseUrlInput.value = baseUrl;
+                }
+                if (usingDefaultBase && elements.canvasBaseUrlInput) {
+                    elements.canvasBaseUrlInput.value = '';
+                    elements.canvasBaseUrlInput.placeholder = CANVAS_BASE_PLACEHOLDER;
                 }
                 try {
                     setAutomationStatus('Syncing with Canvas...', 'info');
