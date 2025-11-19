@@ -102,6 +102,10 @@ function handlePost($endpoint) {
             respondWithSuccess(['message' => 'Data imported successfully']);
             break;
             
+        case 'canvas-events':
+            handleCanvasEventsRequest($data ?: []);
+            break;
+            
         default:
             respondWithError('Endpoint not found', 404);
             break;
@@ -154,6 +158,72 @@ function handleDelete($endpoint) {
             respondWithError('Endpoint not found', 404);
             break;
     }
+}
+
+/**
+ * Proxy Canvas calendar events through the server to skip browser CORS limits
+ */
+function handleCanvasEventsRequest(array $payload) {
+    $baseUrl = isset($payload['baseUrl']) ? trim($payload['baseUrl']) : '';
+    $token = isset($payload['token']) ? trim($payload['token']) : '';
+    $startDate = isset($payload['startDate']) ? $payload['startDate'] : '';
+    $endDate = isset($payload['endDate']) ? $payload['endDate'] : '';
+    $baseUrl = $baseUrl !== '' ? $baseUrl : 'https://canvas.instructure.com/';
+    if ($token === '' || $startDate === '' || $endDate === '') {
+        respondWithError('Missing Canvas credentials or date window.', 422);
+    }
+
+    $normalizedBase = normalise_base_url($baseUrl);
+    $query = http_build_query([
+        'start_date' => $startDate,
+        'end_date' => $endDate,
+        'per_page' => 100
+    ], '', '&', PHP_QUERY_RFC3986);
+    $targetUrl = $normalizedBase . 'api/v1/calendar_events?' . $query . '&include[]=assignment';
+
+    $curl = curl_init($targetUrl);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, [
+        'Accept: application/json',
+        'Authorization: Bearer ' . $token
+    ]);
+
+    $response = curl_exec($curl);
+    if ($response === false) {
+        $error = curl_error($curl);
+        curl_close($curl);
+        respondWithError('Canvas request failed: ' . $error, 500);
+    }
+
+    $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+
+    if ($status < 200 || $status >= 300) {
+        respondWithError('Canvas responded with ' . $status . ': ' . substr($response, 0, 300), $status);
+    }
+
+    $decoded = json_decode($response, true);
+    if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+        respondWithError('Canvas returned an unreadable payload.', 500);
+    }
+
+    respondWithSuccess($decoded);
+}
+
+function normalise_base_url($url) {
+    $url = trim($url);
+    if ($url === '') {
+        return '';
+    }
+    if (!preg_match('#^https?://#i', $url)) {
+        $url = 'https://' . $url;
+    }
+    if (substr($url, -1) !== '/') {
+        $url .= '/';
+    }
+    return $url;
 }
 
 /**

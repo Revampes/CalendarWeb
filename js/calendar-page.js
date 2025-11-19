@@ -1044,25 +1044,76 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             }
 
             async function fetchCanvasEvents(baseUrl, token) {
-                const start = new Date();
-                start.setDate(start.getDate() - 3);
-                const end = new Date();
-                end.setDate(end.getDate() + 30);
+                const windowStart = new Date();
+                windowStart.setDate(windowStart.getDate() - 3);
+                const windowEnd = new Date();
+                windowEnd.setDate(windowEnd.getDate() + 30);
+                const proxyPayload = {
+                    baseUrl,
+                    token,
+                    startDate: windowStart.toISOString(),
+                    endDate: windowEnd.toISOString()
+                };
+                const proxied = await fetchCanvasEventsViaProxy(proxyPayload);
+                if (proxied) {
+                    return proxied;
+                }
+                return fetchCanvasEventsDirect(baseUrl, token, windowStart, windowEnd);
+            }
+
+            async function fetchCanvasEventsViaProxy(payload) {
+                try {
+                    const response = await fetch('php/api.php?endpoint=canvas-events', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.status === 404) {
+                        return null;
+                    }
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Canvas proxy responded with ${response.status}: ${errorText.slice(0, 160)}`);
+                    }
+                    const json = await response.json();
+                    if (!json.success) {
+                        throw new Error(json.error || 'Canvas proxy returned an unknown error.');
+                    }
+                    return json.data;
+                } catch (error) {
+                    if (error.name === 'TypeError') {
+                        console.warn('Canvas proxy unavailable, falling back to browser request.', error);
+                        return null;
+                    }
+                    throw error;
+                }
+            }
+
+            async function fetchCanvasEventsDirect(baseUrl, token, windowStart, windowEnd) {
                 const url = new URL('/api/v1/calendar_events', baseUrl);
-                url.searchParams.set('start_date', start.toISOString());
-                url.searchParams.set('end_date', end.toISOString());
+                url.searchParams.set('start_date', windowStart.toISOString());
+                url.searchParams.set('end_date', windowEnd.toISOString());
                 url.searchParams.set('per_page', '100');
                 url.searchParams.append('include[]', 'assignment');
-                const response = await fetch(url.toString(), {
-                    headers: {
-                        Authorization: `Bearer ${token}`
+                try {
+                    const response = await fetch(url.toString(), {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        throw new Error(`Canvas responded with ${response.status}: ${errorBody.slice(0, 120)}`);
                     }
-                });
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    throw new Error(`Canvas responded with ${response.status}: ${errorBody.slice(0, 120)}`);
+                    return response.json();
+                } catch (error) {
+                    if (error.name === 'TypeError') {
+                        throw new Error('Canvas blocked the browser request (likely due to CORS). Serve this app via a PHP server so the built-in proxy can relay the request.');
+                    }
+                    throw error;
                 }
-                return response.json();
             }
 
             function mapCanvasEvents(events) {
