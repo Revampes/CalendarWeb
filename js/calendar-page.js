@@ -1073,6 +1073,9 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                     if (response.status === 404) {
                         return null;
                     }
+                    if (response.status === 405) {
+                        throw new Error('The Canvas proxy rejected the request (405). Run this app through PHP (e.g., "php -S localhost:8080 -t .") or deploy it to a server that executes php/api.php.');
+                    }
                     if (!response.ok) {
                         const errorText = await response.text();
                         throw new Error(`Canvas proxy responded with ${response.status}: ${errorText.slice(0, 160)}`);
