@@ -1322,7 +1322,7 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                         return null;
                     }
                     if (response.status === 405) {
-                        throw new Error('The Canvas proxy rejected the request (405). Run this app through PHP (e.g., "php -S localhost:8080 -t .") or deploy it to a server that executes php/api.php.');
+                        throw new Error('Canvas Sync requires a backend server. This feature is not available in the standalone app version unless hosted.');
                     }
                     if (!response.ok) {
                         const errorText = await response.text();
