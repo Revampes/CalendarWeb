@@ -6,7 +6,32 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initMobileMenu();
     initModalHandlers();
+    initNotifications();
 });
+
+// Notifications
+function initNotifications() {
+    if (!('Notification' in window)) {
+        console.log('This browser does not support desktop notification');
+        return;
+    }
+
+    if (Notification.permission === 'granted') {
+        new Notification('Welcome back!', {
+            body: 'Calendar App is ready to help you organize your schedule.',
+            icon: 'assets/icons/icon-192.png'
+        });
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') {
+                new Notification('Welcome!', {
+                    body: 'Thank you for enabling notifications.',
+                    icon: 'assets/icons/icon-192.png'
+                });
+            }
+        });
+    }
+}
 
 // Theme Management
 function initTheme() {
