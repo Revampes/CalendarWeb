@@ -11,36 +11,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Notifications
 function initNotifications() {
-    if (!('Notification' in window)) {
-        console.log('This browser does not support desktop notification');
-        return;
-    }
+    // Helper to actually show the notification
+    const triggerWelcome = () => {
+        const title = 'Welcome!';
+        const options = {
+            body: 'Your calendar is ready to use.',
+            vibrate: [100, 50, 100],
+            tag: 'welcome-msg',
+            requireInteraction: true // Keeps notification on screen
+        };
 
-    const showNotification = () => {
+        // Method 1: Service Worker (Preferred for Android/PWA)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification('Welcome back!', {
-                    body: 'Calendar App is ready to help you organize your schedule.',
-                    icon: 'assets/icons/icon-192.png',
-                    vibrate: [200, 100, 200]
-                });
+            navigator.serviceWorker.getRegistration().then(reg => {
+                if (reg && reg.active) {
+                    reg.showNotification(title, options)
+                        .catch(e => console.error('SW detection failed', e));
+                    return;
+                }
+                // Fallback if no active SW
+                try { new Notification(title, options); } catch(e) { console.log(e); }
             });
+        } else {
+            // Method 2: Standard API
+            try { new Notification(title, options); } catch(e) { console.log(e); }
         }
     };
 
+    // Permission Logic
+    if (!('Notification' in window)) {
+        console.log('Notifications not supported');
+        return;
+    }
+
     if (Notification.permission === 'granted') {
-        showNotification();
+        triggerWelcome();
     } else if (Notification.permission !== 'denied') {
-        // Request permission on next interaction
-        const requestPermission = () => {
-            Notification.requestPermission().then((permission) => {
+        // User must interact to trigger permission request
+        document.addEventListener('click', () => {
+            Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
-                    showNotification();
+                    triggerWelcome();
                 }
             });
-            document.removeEventListener('click', requestPermission);
-        };
-        document.addEventListener('click', requestPermission);
+        }, { once: true });
     }
 }
 
