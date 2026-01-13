@@ -11,31 +11,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Notifications
 function initNotifications() {
-    // Helper to actually show the notification
+    // Helper to actually show the notification via the active service worker
     const triggerWelcome = () => {
         const title = 'Welcome!';
         const options = {
             body: 'Your calendar is ready to use.',
             vibrate: [100, 50, 100],
             tag: 'welcome-msg',
-            requireInteraction: true // Keeps notification on screen
+            requireInteraction: true
         };
 
-        // Method 1: Service Worker (Preferred for Android/PWA)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistration().then(reg => {
-                if (reg && reg.active) {
-                    reg.showNotification(title, options)
-                        .catch(e => console.error('SW detection failed', e));
-                    return;
-                }
-                // Fallback if no active SW
-                try { new Notification(title, options); } catch(e) { console.log(e); }
-            });
-        } else {
-            // Method 2: Standard API
-            try { new Notification(title, options); } catch(e) { console.log(e); }
+        if (!('serviceWorker' in navigator)) {
+            try { new Notification(title, options); } catch (e) { console.error('Notification fallback failed', e); }
+            return;
         }
+
+        // Wait for the SW to be active before showing (covers “open from home screen”)
+        navigator.serviceWorker.ready
+            .then(reg => reg.showNotification(title, options))
+            .catch(err => {
+                console.error('SW notification failed', err);
+                try { new Notification(title, options); } catch (e) { console.error('Notification fallback failed', e); }
+            });
     };
 
     // Permission Logic
@@ -46,16 +43,22 @@ function initNotifications() {
 
     if (Notification.permission === 'granted') {
         triggerWelcome();
-    } else if (Notification.permission !== 'denied') {
-        // User must interact to trigger permission request
-        document.addEventListener('click', () => {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    triggerWelcome();
-                }
-            });
-        }, { once: true });
+        return;
     }
+
+    if (Notification.permission === 'denied') {
+        console.warn('Notifications blocked by the user');
+        return;
+    }
+
+    // Request on first user tap/click to comply with browser gesture requirements
+    document.addEventListener('click', () => {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                triggerWelcome();
+            }
+        }).catch(err => console.error('Permission request failed', err));
+    }, { once: true });
 }
 
 // Theme Management
