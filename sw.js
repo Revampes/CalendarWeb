@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calendar-app-v2';
+const CACHE_NAME = 'calendar-app-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -54,6 +54,25 @@ self.addEventListener('fetch', (event) => {
           // Fallback if offline and nothing in cache (optional)
       });
       return cachedResponse || fetchPromise;
+    })
+  );
+});
+
+// Notification Click Handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If there's an already open window, focus it
+      for (const client of clientList) {
+        if ('focus' in client) {
+          return client.focus();
+        }
+      }
+      // Otherwise open a new window
+      if (clients.openWindow) {
+        return clients.openWindow('./');
+      }
     })
   );
 });

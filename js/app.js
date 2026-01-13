@@ -16,20 +16,31 @@ function initNotifications() {
         return;
     }
 
-    if (Notification.permission === 'granted') {
-        new Notification('Welcome back!', {
-            body: 'Calendar App is ready to help you organize your schedule.',
-            icon: 'assets/icons/icon-192.png'
-        });
-    } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then((permission) => {
-            if (permission === 'granted') {
-                new Notification('Welcome!', {
-                    body: 'Thank you for enabling notifications.',
-                    icon: 'assets/icons/icon-192.png'
+    const showNotification = () => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification('Welcome back!', {
+                    body: 'Calendar App is ready to help you organize your schedule.',
+                    icon: 'assets/icons/icon-192.png',
+                    vibrate: [200, 100, 200]
                 });
-            }
-        });
+            });
+        }
+    };
+
+    if (Notification.permission === 'granted') {
+        showNotification();
+    } else if (Notification.permission !== 'denied') {
+        // Request permission on next interaction
+        const requestPermission = () => {
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    showNotification();
+                }
+            });
+            document.removeEventListener('click', requestPermission);
+        };
+        document.addEventListener('click', requestPermission);
     }
 }
 
