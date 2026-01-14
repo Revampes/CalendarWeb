@@ -12,62 +12,95 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Notifications
 function initNotifications() {
-    // Helper to actually show the notification via the active service worker
-    const triggerWelcome = () => {
-        // Only trigger welcome if requested explicitly or first time logic, 
-        // but here it is just a permission test. 
-        // Commenting out welcome message to avoid spam on reload, 
-        // or just keep it as "Test Notification" if user clicks something.
-        // For now, let's just logging.
-        console.log("Notifications initialized.");
-    };
-
-    // Permission Logic
+    console.log("[Debug] Initializing notifications...");
+    
     if (!('Notification' in window)) {
-        console.log('Notifications not supported');
+        console.error('[Debug] Notifications not supported by this browser');
         return;
     }
 
+    console.log("[Debug] Current Notification permission:", Notification.permission);
+
     if (Notification.permission === 'granted') {
-        triggerWelcome();
+        console.log("[Debug] Permission granted. Triggering instant test notification...");
+        sendTestNotification();
         return;
     }
 
     if (Notification.permission === 'denied') {
-        console.warn('Notifications blocked by the user');
+        console.warn('[Debug] Notifications blocked by the user');
         return;
     }
 
     // Request on first user tap/click to comply with browser gesture requirements
+    console.log("[Debug] Waiting for user click to request permission...");
     document.addEventListener('click', () => {
+        console.log("[Debug] User clicked. Requesting permission...");
         Notification.requestPermission().then(permission => {
+            console.log("[Debug] Permission request result:", permission);
             if (permission === 'granted') {
-                triggerWelcome();
-                // Send a test notification to confirm it works
-                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.ready.then(reg => {
-                        reg.showNotification('Notifications Enabled', {
-                            body: 'You will now receive reminders for your events.',
-                            icon: 'assets/icons/icon-192.png',
-                             vibrate: [100, 50, 100]
-                        });
-                    });
-                }
+                sendTestNotification();
             }
-        }).catch(err => console.error('Permission request failed', err));
+        }).catch(err => console.error('[Debug] Permission request failed', err));
     }, { once: true });
+}
+
+function sendTestNotification() {
+    const title = 'System Check';
+    const options = {
+        body: 'Notifications are active! timestamp: ' + new Date().toLocaleTimeString(),
+        icon: 'assets/icons/icon.svg',
+        vibrate: [100, 50, 100],
+        tag: 'debug-test-' + Date.now(),
+        requireInteraction: true
+    };
+
+    console.log("[Debug] Attempting to send test notification:", title, options);
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+            console.log("[Debug] Service Worker ready. Calling showNotification...");
+            reg.showNotification(title, options).then(() => {
+                console.log("[Debug] Service Worker notification sent successfully.");
+            }).catch(e => {
+                console.error("[Debug] SW showNotification failed:", e);
+                // Fallback
+                try {
+                    new Notification(title, options);
+                    console.log("[Debug] Fallback Notification sent.");
+                } catch (fallbackErr) {
+                    console.error("[Debug] Fallback Notification failed:", fallbackErr);
+                }
+            });
+        }).catch(err => {
+            console.error("[Debug] Service Worker not ready:", err);
+        });
+    } else {
+        try {
+            new Notification(title, options);
+            console.log("[Debug] Standard Notification sent (No SW).");
+        } catch (e) {
+            console.error("[Debug] Standard Notification failed:", e);
+        }
+    }
 }
 
 // Reminder Checker Loop
 function initReminderCheck() {
+    console.log("[Debug] Starting reminder check loop...");
     // Check every minute
     setInterval(checkReminders, 60000);
-    // Initial check
+    // Initial check after 5s
     setTimeout(checkReminders, 5000); 
 }
 
 function checkReminders() {
-    if (Notification.permission !== 'granted') return;
+    console.log("[Debug] Checking for reminders...", new Date().toLocaleTimeString());
+    
+    if (Notification.permission !== 'granted') {
+        console.log("[Debug] Cannot check reminders: Permission not granted.");
+        return;
+    }
 
     const now = new Date();
     const dateString = CalendarApp.formatDateForStorage(now);
@@ -78,10 +111,12 @@ function checkReminders() {
     const deadlines = CalendarApp.Storage.getDeadlinesForDate(dateString);
 
     const items = [...tasks, ...deadlines];
+    console.log(`[Debug] Found ${items.length} items for today. Checking time: ${timeString}`);
 
     items.forEach(item => {
+        console.log(`[Debug] Checking item: ${item.name} at ${item.time}`);
         if (item.time === timeString) {
-            // It's time!
+            console.log("[Debug] Time match! Sending notification for:", item.name);
             sendNotification(item);
         }
     });
@@ -91,18 +126,23 @@ function sendNotification(item) {
     const title = `Reminder: ${item.name}`;
     const options = {
         body: item.description || `It's time for ${item.name}`,
-        icon: 'assets/icons/icon-192.png',
-        badge: 'assets/icons/icon-192.png',
+        icon: 'assets/icons/icon.svg',
+        badge: 'assets/icons/icon.svg',
         vibrate: [200, 100, 200],
         tag: `reminder-${item.id}`, // Prevent duplicate notifications
-        renotify: true
+        renotify: true,
+        requireInteraction: true
     };
+    
+    console.log("[Debug] Sending task notification:", title);
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification(title, options);
+            reg.showNotification(title, options).then(() => {
+                console.log("[Debug] Task notification sent via SW");
+            });
         }).catch(err => {
-             console.error('SW notification failed', err);
+             console.error('[Debug] SW notification failed', err);
              new Notification(title, options);
         });
     } else {

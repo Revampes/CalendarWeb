@@ -9,8 +9,9 @@ const ASSETS_TO_CACHE = [
   './js/app.js',
   './js/calendar.js',
   './js/calendar-page.js',
-  'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css'
+  // Removed external CDNs to prevent CORS issues during SW install
+  // 'https://cdn.tailwindcss.com',
+  // 'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css'
 ];
 
 // Install Service Worker
@@ -82,8 +83,8 @@ self.addEventListener('push', (event) => {
   let title = 'Calendar Reminder';
   let options = {
     body: 'You have an upcoming event.',
-    icon: './assets/icons/icon-192.png',
-    badge: './assets/icons/icon-192.png',
+    icon: './assets/icons/icon.svg',
+    badge: './assets/icons/icon.svg',
     vibrate: [100, 50, 100],
     data: { url: './' }
   };

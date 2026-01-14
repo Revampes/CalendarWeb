@@ -7,10 +7,12 @@
     
     <!-- PWA Settings -->
     <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Calendar">
-    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/icon.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
     
     <!-- Service Worker Registration -->
     <script>
@@ -111,7 +113,7 @@
         <div class="container mx-auto px-4 py-3">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-2">
-                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b5e1e873f23741a8b35ca632a3ca932f~tplv-a9rns2rl98-image.image?rcl=20251106180031E24DA2FD0C21EF10CDE5&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765015245&x-signature=RKJB2ttdvlu0bEeRta72gb9uI9Q%3D" alt="Calendar Logo" class="h-10 w-10">
+                    <img src="assets/icons/icon.svg" alt="Calendar Logo" class="h-10 w-10">
                     <span class="text-xl font-bold text-primary-600 dark:text-primary-400">CalendarPro</span>
                 </div>
                 <div class="hidden md:flex space-x-8">
@@ -587,6 +589,46 @@
                     prompt.classList.remove('translate-y-full');
                 }, 2000);
             }
+        });
+    </script>
+    <!-- Debug: Send immediate test notification and log permission -->
+    <script>
+        window.sendTestNotification = async function() {
+            console.debug('[Debug] sendTestNotification start');
+            if (!('Notification' in window)) { console.debug('[Debug] Notifications not supported'); return; }
+            try {
+                const perm = await Notification.requestPermission();
+                console.debug('[Debug] Permission:', perm);
+                if (perm !== 'granted') { console.debug('[Debug] Permission not granted'); return; }
+
+                const title = 'CalendarPro — System Check';
+                const options = {
+                    body: 'Notifications are working — ' + new Date().toLocaleTimeString(),
+                    icon: 'assets/icons/icon.svg',
+                    tag: 'system-check'
+                };
+
+                try {
+                    const reg = await navigator.serviceWorker.getRegistration();
+                    if (reg && reg.showNotification) {
+                        console.debug('[Debug] Using service worker to show notification');
+                        await reg.showNotification(title, options);
+                    } else {
+                        console.debug('[Debug] Using window.Notification');
+                        new Notification(title, options);
+                    }
+                    console.debug('[Debug] Notification sent');
+                } catch (err) {
+                    console.error('[Debug] Notification error', err);
+                }
+            } catch (e) {
+                console.error('[Debug] Permission request failed', e);
+            }
+        };
+
+        window.addEventListener('load', () => {
+            console.debug('[Debug] Page loaded — sending immediate test notification');
+            window.sendTestNotification();
         });
     </script>
 </body>
