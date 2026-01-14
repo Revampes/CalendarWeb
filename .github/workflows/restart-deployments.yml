@@ -1,0 +1,61 @@
+name: Restart Deployments
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Restart deployments for all environments
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const ref = 'main';
+
+            console.log(`Repo: ${owner}/${repo}, ref: ${ref}`);
+
+            try {
+              const envs = await github.rest.repos.getAllEnvironments({ owner, repo });
+              const environments = envs.data.environments || [];
+
+              if (environments.length === 0) {
+                console.log('No environments found. Creating a generic deployment for the ref.');
+              }
+
+              for (const env of environments) {
+                console.log(`Creating deployment for environment: ${env.name}`);
+                await github.rest.repos.createDeployment({
+                  owner,
+                  repo,
+                  ref,
+                  environment: env.name,
+                  auto_merge: false,
+                  required_contexts: [],
+                  transient_environment: false,
+                  description: 'Restart deployment via workflow_dispatch'
+                });
+              }
+
+              console.log('Also creating a generic deployment on the ref (no environment).');
+              await github.rest.repos.createDeployment({
+                owner,
+                repo,
+                ref,
+                auto_merge: false,
+                required_contexts: [],
+                transient_environment: false,
+                description: 'Restart deployment (no environment)'
+              });
+
+              console.log('Deployment restart requests submitted. Check your deployments or deployment workflows.');
+            } catch (error) {
+              console.error(error);
+              throw error;
+            }
