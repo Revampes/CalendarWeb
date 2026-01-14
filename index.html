@@ -18,9 +18,13 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed: ', err));
+                const scope = location.pathname.replace(/\/[^\/]*$/, '/');
+                console.log('[SW] Calculated scope:', scope);
+                navigator.serviceWorker.register('./sw.js', { scope })
+                    .then(registration => {
+                        console.log('[SW] Registered with scope:', registration.scope);
+                    })
+                    .catch(err => console.error('[SW] Registration failed:', err));
             });
         }
     </script>
@@ -594,12 +598,12 @@
     <!-- Debug: Send immediate test notification and log permission -->
     <script>
         window.sendTestNotification = async function() {
-            console.debug('[Debug] sendTestNotification start');
-            if (!('Notification' in window)) { console.debug('[Debug] Notifications not supported'); return; }
+            console.log('[Debug] sendTestNotification start');
+            if (!('Notification' in window)) { console.log('[Debug] Notifications not supported'); return; }
             try {
                 const perm = await Notification.requestPermission();
-                console.debug('[Debug] Permission:', perm);
-                if (perm !== 'granted') { console.debug('[Debug] Permission not granted'); return; }
+                console.log('[Debug] Permission:', perm);
+                if (perm !== 'granted') { console.log('[Debug] Permission not granted'); return; }
 
                 const title = 'CalendarPro — System Check';
                 const options = {
@@ -610,17 +614,16 @@
 
                 if ('serviceWorker' in navigator) {
                     try {
-                        // Wait for the Service Worker to be active gkdjshfg
                         const reg = await navigator.serviceWorker.ready;
-                        console.debug('[Debug] Service Worker ready:', reg);
+                        console.log('[Debug] Service Worker ready:', reg);
                         await reg.showNotification(title, options);
-                        console.debug('[Debug] Notification sent via SW');
+                        console.log('[Debug] Notification sent via SW');
                     } catch (swErr) {
                         console.warn('[Debug] SW notification failed, trying fallback:', swErr);
                         new Notification(title, options);
                     }
                 } else {
-                    console.debug('[Debug] No SW support, using window.Notification');
+                    console.log('[Debug] No SW support, using window.Notification');
                     new Notification(title, options);
                 }
             } catch (e) {
@@ -629,7 +632,7 @@
         };
 
         window.addEventListener('load', () => {
-            console.debug('[Debug] Page loaded — sending immediate test notification');
+            console.log('[Debug] Page loaded — sending immediate test notification');
             window.sendTestNotification();
         });
     </script>
