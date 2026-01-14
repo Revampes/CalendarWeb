@@ -593,38 +593,43 @@
     </script>
     <!-- Debug: Send immediate test notification and log permission -->
     <script>
-        windo.sendTestNotification = async function() {
-            if (!('Notification' in window)) {
-
-            }
+        window.sendTestNotification = async function() {
+            console.debug('[Debug] sendTestNotification start');
+            if (!('Notification' in window)) { console.debug('[Debug] Notifications not supported'); return; }
             try {
                 const perm = await Notification.requestPermission();
-                if (perm !== 'granted') {
+                console.debug('[Debug] Permission:', perm);
+                if (perm !== 'granted') { console.debug('[Debug] Permission not granted'); return; }
 
-                }
-                const title = 'CalendarPro - Test Notification';
+                const title = 'CalendarPro — System Check';
                 const options = {
-                    body: 'This is a test notification from CalendarPro.',
-                    icon: 'assets/icons/icon-192.png',
+                    body: 'Notifications are working — ' + new Date().toLocaleTimeString(),
+                    icon: 'assets/icons/icon.svg',
+                    tag: 'system-check'
                 };
 
                 if ('serviceWorker' in navigator) {
                     try {
+                        // Wait for the Service Worker to be active
                         const reg = await navigator.serviceWorker.ready;
+                        console.debug('[Debug] Service Worker ready:', reg);
                         await reg.showNotification(title, options);
+                        console.debug('[Debug] Notification sent via SW');
                     } catch (swErr) {
+                        console.warn('[Debug] SW notification failed, trying fallback:', swErr);
                         new Notification(title, options);
                     }
                 } else {
+                    console.debug('[Debug] No SW support, using window.Notification');
                     new Notification(title, options);
                 }
-        
             } catch (e) {
-
+                console.error('[Debug] Global notification error', e);
             }
         };
 
         window.addEventListener('load', () => {
+            console.debug('[Debug] Page loaded — sending immediate test notification');
             window.sendTestNotification();
         });
     </script>
