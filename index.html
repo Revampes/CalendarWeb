@@ -593,7 +593,40 @@
     </script>
     <!-- Debug: Send immediate test notification and log permission -->
     <script>
-        //
+        windo.sendTestNotification = async function() {
+            if (!('Notification' in window)) {
+
+            }
+            try {
+                const perm = await Notification.requestPermission();
+                if (perm !== 'granted') {
+
+                }
+                const title = 'CalendarPro - Test Notification';
+                const options = {
+                    body: 'This is a test notification from CalendarPro.',
+                    icon: 'assets/icons/icon-192.png',
+                };
+
+                if ('serviceWorker' in navigator) {
+                    try {
+                        const reg = await navigator.serviceWorker.ready;
+                        await reg.showNotification(title, options);
+                    } catch (swErr) {
+                        new Notification(title, options);
+                    }
+                } else {
+                    new Notification(title, options);
+                }
+        
+            } catch (e) {
+
+            }
+        };
+
+        window.addEventListener('load', () => {
+            window.sendTestNotification();
+        });
     </script>
 </body>
 </html>
