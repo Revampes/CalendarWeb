@@ -610,7 +610,7 @@
 
                 if ('serviceWorker' in navigator) {
                     try {
-                        // Wait for the Service Worker to be active
+                        // Wait for the Service Worker to be active gkdjshfg
                         const reg = await navigator.serviceWorker.ready;
                         console.debug('[Debug] Service Worker ready:', reg);
                         await reg.showNotification(title, options);
