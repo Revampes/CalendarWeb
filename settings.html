@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings - Calendar App</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="assets/icons/icon.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                         accent: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @layer utilities {
+             .bg-black-gradient {
+                background: linear-gradient(135deg, #000000 0%, #121212 100%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-black-gradient min-h-screen text-gray-800 dark:text-gray-100 transition-colors duration-200">
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-30 border-b border-gray-200 dark:border-gray-800 backdrop-blur-md bg-opacity-90 dark:bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Back Button & Title -->
+                <div class="flex items-center">
+                    <a href="index.html" class="p-2 -ml-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition mr-2">
+                        <i class="fa fa-arrow-left text-lg"></i>
+                    </a>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-700 to-accent-600 dark:from-primary-300 dark:to-accent-400">
+                        Settings
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Notifications Settings Section -->
+        <section class="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden mb-6">
+            <div class="p-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa fa-bell text-accent-500"></i> Notifications
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- Daily Schedule Notification Toggle -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-medium text-gray-900 dark:text-gray-100">Daily Schedule Briefing</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Receive a summary of today's schedule, to-dos, and upcoming deadlines.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="daily-notification-toggle" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                        </label>
+                    </div>
+
+                    <!-- Time Picker -->
+                    <div id="daily-time-container" class="transition-all duration-300 overflow-hidden" style="max-height: 0px; opacity: 0;">
+                        <div class="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
+                            <label for="daily-notification-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Briefing Time
+                            </label>
+                            <input type="time" id="daily-notification-time" class="block w-full sm:w-48 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm text-gray-900 dark:text-white">
+                            <p class="mt-1 text-xs text-gray-500">The app will attempt to notify you at this time.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Save Button -->
+        <div class="flex justify-end">
+             <button id="save-settings-btn" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-md transition transform active:scale-95">
+                Save Settings
+            </button>
+        </div>
+
+    </main>
+
+    <script src="js/app.js"></script> <!-- Reusing app.js for theme, etc. -->
+    <script>
+        // Settings Script
+        document.addEventListener('DOMContentLoaded', () => {
+             // Init Theme (from app.js)
+            const toggle = document.getElementById('daily-notification-toggle');
+            const timeContainer = document.getElementById('daily-time-container');
+            const timeInput = document.getElementById('daily-notification-time');
+            const saveBtn = document.getElementById('save-settings-btn');
+            
+            // Load Settings
+            const settings = JSON.parse(localStorage.getItem('calendar_settings') || '{}');
+            
+            if (settings.dailyBriefingEnabled) {
+                toggle.checked = true;
+                timeContainer.style.maxHeight = '200px';
+                timeContainer.style.opacity = '1';
+            }
+            
+            if (settings.dailyBriefingTime) {
+                timeInput.value = settings.dailyBriefingTime;
+            } else {
+                timeInput.value = '08:00'; // Default
+            }
+
+            // Toggle Handler
+            toggle.addEventListener('change', () => {
+                if (toggle.checked) {
+                    timeContainer.style.maxHeight = '200px';
+                    timeContainer.style.opacity = '1';
+                    if (Notification.permission !== 'granted') {
+                        Notification.requestPermission();
+                    }
+                } else {
+                    timeContainer.style.maxHeight = '0px';
+                    timeContainer.style.opacity = '0';
+                }
+            });
+
+            // Save Handler
+            saveBtn.addEventListener('click', () => {
+                const newSettings = {
+                    dailyBriefingEnabled: toggle.checked,
+                    dailyBriefingTime: timeInput.value
+                };
+                
+                localStorage.setItem('calendar_settings', JSON.stringify(newSettings));
+                
+                // Show feedback
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = 'Saved!';
+                saveBtn.classList.remove('bg-primary-600', 'hover:bg-primary-700');
+                saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.classList.add('bg-primary-600', 'hover:bg-primary-700');
+                    saveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -22,8 +22,8 @@ function initNotifications() {
     console.log("[Debug] Current Notification permission:", Notification.permission);
 
     if (Notification.permission === 'granted') {
-        console.log("[Debug] Permission granted. Triggering instant test notification...");
-        sendTestNotification();
+        console.log("[Debug] Permission granted. Monitoring for scheduled notifications...");
+        // sendTestNotification(); // Disabled instant notification on load
         return;
     }
 
@@ -39,7 +39,8 @@ function initNotifications() {
         Notification.requestPermission().then(permission => {
             console.log("[Debug] Permission request result:", permission);
             if (permission === 'granted') {
-                sendTestNotification();
+                // sendTestNotification(); // Disabled
+                console.log("[Debug] Permission granted via click.");
             }
         }).catch(err => console.error('[Debug] Permission request failed', err));
     }, { once: true });
@@ -106,43 +107,108 @@ function checkReminders() {
     const dateString = CalendarApp.formatDateForStorage(now);
     const timeString = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
 
-    // Get items
+    // --- Daily Briefing Check ---
+    const settings = JSON.parse(localStorage.getItem('calendar_settings') || '{}');
+    if (settings.dailyBriefingEnabled && settings.dailyBriefingTime === timeString) {
+        sendDailyBriefing(dateString);
+    }
+
+    // --- Task/Deadline Reminders ---
     const tasks = CalendarApp.Storage.getTasksForDate(dateString);
     const deadlines = CalendarApp.Storage.getDeadlinesForDate(dateString);
-
     const items = [...tasks, ...deadlines];
-    console.log(`[Debug] Found ${items.length} items for today. Checking time: ${timeString}`);
 
     items.forEach(item => {
-        console.log(`[Debug] Checking item: ${item.name} at ${item.time}`);
+        // Exact Time
         if (item.time === timeString) {
-            console.log("[Debug] Time match! Sending notification for:", item.name);
-            sendNotification(item);
+            sendNotification(item, false);
+        }
+        // 5 Minutes Before
+        if (item.time) {
+            const warningTime = subtractMinutes(item.time, 5);
+            if (warningTime === timeString) {
+                sendNotification(item, true);
+            }
         }
     });
 }
 
-function sendNotification(item) {
-    const title = `Reminder: ${item.name}`;
+function subtractMinutes(timeStr, mins) {
+    if (!timeStr) return null;
+    try {
+        const [h, m] = timeStr.split(':').map(Number);
+        const date = new Date();
+        date.setHours(h, m - mins, 0, 0);
+        return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+        return null;
+    }
+}
+
+function sendDailyBriefing(todayDateStr) {
+    const tasks = CalendarApp.Storage.getTasksForDate(todayDateStr);
+    const deadlines = CalendarApp.Storage.getDeadlinesForDate(todayDateStr);
+    
+    // Future deadlines (3 days)
+    let upcoming = [];
+    for (let i = 1; i <= 3; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i);
+        const dStr = CalendarApp.formatDateForStorage(d);
+        const ds = CalendarApp.Storage.getDeadlinesForDate(dStr);
+        ds.forEach(item => {
+            upcoming.push(`${item.name} (${CalendarApp.formatDateShort(dStr)})`);
+        });
+    }
+
+    const todayCount = tasks.length + deadlines.length;
+    let body = `Today you have ${todayCount} items.`;
+    
+    if (deadlines.length > 0) {
+        body += `\nDeadlines today: ${deadlines.map(d => d.name).join(', ')}.`;
+    }
+    
+    if (upcoming.length > 0) {
+        body += `\nUpcoming in 3 days: ${upcoming.join(', ')}`;
+    }
+
+    const title = "📅 Daily Schedule Briefing";
     const options = {
-        body: item.description || `It's time for ${item.name}`,
+        body: body,
+        icon: 'assets/icons/icon.svg',
+        tag: 'daily-briefing-' + todayDateStr,
+        requireInteraction: true
+    };
+
+    dispatchNotification(title, options);
+}
+
+function sendNotification(item, isEarly) {
+    const title = isEarly ? `Upcoming: ${item.name}` : `Reminder: ${item.name}`;
+    let body = item.description || `It's time for ${item.name}`;
+    
+    if (isEarly) {
+        body = `Starting in 5 minutes. ${body}`;
+    }
+
+    const options = {
+        body: body,
         icon: 'assets/icons/icon.svg',
         badge: 'assets/icons/icon.svg',
         vibrate: [200, 100, 200],
-        tag: `reminder-${item.id}`, // Prevent duplicate notifications
+        tag: `reminder-${item.id}-${isEarly ? 'early' : 'now'}`,
         renotify: true,
         requireInteraction: true
     };
     
-    console.log("[Debug] Sending task notification:", title);
+    dispatchNotification(title, options);
+}
 
+function dispatchNotification(title, options) {
+    console.log("[Debug] Dispatching notification:", title);
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification(title, options).then(() => {
-                console.log("[Debug] Task notification sent via SW");
-            });
-        }).catch(err => {
-             console.error('[Debug] SW notification failed', err);
+            reg.showNotification(title, options);
              new Notification(title, options);
         });
     } else {
