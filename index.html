@@ -596,14 +596,34 @@
         });
     </script>
     <!-- Debug: Send immediate test notification and log permission -->
+    <section id="notification-permission-card" class="fixed bottom-4 inset-x-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-96 bg-white dark:bg-gray-900 shadow-xl rounded-lg p-4 z-40 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex-1">
+                <div class="flex items-center gap-2">
+                    <span id="notification-status-dot" class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+                    <p id="notification-status-text" class="text-sm font-semibold text-gray-900 dark:text-gray-100">Checking notification support…</p>
+                </div>
+                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Enable notifications to receive reminders on your phone. Tap the button to allow and send a quick test.</p>
+            </div>
+            <button id="notification-permission-close" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" aria-label="Dismiss notification helper">✕</button>
+        </div>
+        <div class="mt-3 flex items-center gap-2">
+            <button id="notification-permission-btn" class="px-3 py-2 text-sm font-semibold rounded-md bg-primary-600 text-white hover:bg-primary-700 transition">Enable notifications</button>
+            <button id="notification-test-btn" class="px-3 py-2 text-sm font-semibold rounded-md border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Send test</button>
+        </div>
+        <div id="mobile-debug-log" class="mt-3 max-h-24 overflow-y-auto text-[11px] leading-tight text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded p-2 hidden"></div>
+    </section>
+
     <script>
         window.sendTestNotification = async function() {
             console.log('[Debug] sendTestNotification start');
             if (!('Notification' in window)) { console.log('[Debug] Notifications not supported'); return; }
             try {
-                const perm = await Notification.requestPermission();
-                console.log('[Debug] Permission:', perm);
-                if (perm !== 'granted') { console.log('[Debug] Permission not granted'); return; }
+                // Do not request permission here; assume caller already ensured it.
+                if (Notification.permission !== 'granted') {
+                    console.log('[Debug] Permission not granted; skip test notification');
+                    return;
+                }
 
                 const title = 'CalendarPro — System Check';
                 const options = {
@@ -631,10 +651,99 @@
             }
         };
 
-        window.addEventListener('load', () => {
-            console.log('[Debug] Page loaded — sending immediate test notification');
-            window.sendTestNotification();
-        });
+        (() => {
+            const card = document.getElementById('notification-permission-card');
+            const statusDot = document.getElementById('notification-status-dot');
+            const statusText = document.getElementById('notification-status-text');
+            const btn = document.getElementById('notification-permission-btn');
+            const testBtn = document.getElementById('notification-test-btn');
+            const closeBtn = document.getElementById('notification-permission-close');
+            const logBox = document.getElementById('mobile-debug-log');
+
+            const log = (msg) => {
+                console.log('[MobileDebug]', msg);
+                if (!logBox) return;
+                const time = new Date().toLocaleTimeString();
+                logBox.classList.remove('hidden');
+                const line = document.createElement('div');
+                line.textContent = `[${time}] ${msg}`;
+                logBox.appendChild(line);
+                logBox.scrollTop = logBox.scrollHeight;
+            };
+
+            const setStatus = (text, color = 'bg-amber-400') => {
+                statusText.textContent = text;
+                statusDot.className = `h-2.5 w-2.5 rounded-full ${color}`;
+            };
+
+            const refreshState = () => {
+                if (!('Notification' in window)) {
+                    setStatus('Notifications not supported on this device', 'bg-red-500');
+                    btn.disabled = true;
+                    testBtn.disabled = true;
+                    log('Notifications not supported');
+                    return;
+                }
+
+                setStatus(`Permission: ${Notification.permission}`, Notification.permission === 'granted' ? 'bg-emerald-500' : 'bg-amber-400');
+
+                if (Notification.permission === 'granted') {
+                    btn.textContent = 'Permission granted';
+                    btn.disabled = true;
+                } else if (Notification.permission === 'denied') {
+                    btn.textContent = 'Permission denied (change in browser settings)';
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = 'Enable notifications';
+                    btn.disabled = false;
+                }
+            };
+
+            const requestPermission = async () => {
+                if (!('Notification' in window)) return;
+                try {
+                    log('Requesting permission…');
+                    const perm = await Notification.requestPermission();
+                    log(`Permission result: ${perm}`);
+                    refreshState();
+                    if (perm === 'granted') {
+                        await window.sendTestNotification();
+                    }
+                } catch (err) {
+                    log(`Permission request failed: ${err}`);
+                }
+            };
+
+            btn.addEventListener('click', requestPermission);
+            testBtn.addEventListener('click', async () => {
+                if (Notification.permission !== 'granted') {
+                    log('Permission not granted; requesting first…');
+                    await requestPermission();
+                    return;
+                }
+                log('Sending test notification…');
+                await window.sendTestNotification();
+            });
+
+            closeBtn.addEventListener('click', () => {
+                card.classList.add('hidden');
+            });
+
+            refreshState();
+
+            // On load: if permission already granted, fire a test to prove delivery.
+            if (Notification.permission === 'granted') {
+                log('Permission already granted; sending test notification');
+                window.sendTestNotification();
+            }
+
+            // iOS note: Notifications only work for installed web apps on iOS 16.4+.
+            const ua = navigator.userAgent || '';
+            const isiOS = /iPad|iPhone|iPod/.test(ua);
+            if (isiOS && !window.navigator.standalone) {
+                log('On iOS, install this app to the home screen to enable push notifications.');
+            }
+        })();
     </script>
 </body>
 </html>
