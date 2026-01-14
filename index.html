@@ -608,21 +608,23 @@
                     tag: 'system-check'
                 };
 
-                try {
-                    const reg = await navigator.serviceWorker.getRegistration();
-                    if (reg && reg.showNotification) {
-                        console.debug('[Debug] Using service worker to show notification');
+                if ('serviceWorker' in navigator) {
+                    try {
+                        // Wait for the Service Worker to be active
+                        const reg = await navigator.serviceWorker.ready;
+                        console.debug('[Debug] Service Worker ready:', reg);
                         await reg.showNotification(title, options);
-                    } else {
-                        console.debug('[Debug] Using window.Notification');
+                        console.debug('[Debug] Notification sent via SW');
+                    } catch (swErr) {
+                        console.warn('[Debug] SW notification failed, trying fallback:', swErr);
                         new Notification(title, options);
                     }
-                    console.debug('[Debug] Notification sent');
-                } catch (err) {
-                    console.error('[Debug] Notification error', err);
+                } else {
+                    console.debug('[Debug] No SW support, using window.Notification');
+                    new Notification(title, options);
                 }
             } catch (e) {
-                console.error('[Debug] Permission request failed', e);
+                console.error('[Debug] Global notification error', e);
             }
         };
 
