@@ -76,3 +76,29 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
+// Push Notification Handler
+self.addEventListener('push', (event) => {
+  let title = 'Calendar Reminder';
+  let options = {
+    body: 'You have an upcoming event.',
+    icon: './assets/icons/icon-192.png',
+    badge: './assets/icons/icon-192.png',
+    vibrate: [100, 50, 100],
+    data: { url: './' }
+  };
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      title = data.title || title;
+      options = { ...options, ...data };
+    } catch (e) {
+      options.body = event.data.text();
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});

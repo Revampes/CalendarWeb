@@ -7,32 +7,19 @@ document.addEventListener('DOMContentLoaded', () => {
     initMobileMenu();
     initModalHandlers();
     initNotifications();
+    initReminderCheck();
 });
 
 // Notifications
 function initNotifications() {
     // Helper to actually show the notification via the active service worker
     const triggerWelcome = () => {
-        const title = 'Welcome!';
-        const options = {
-            body: 'Your calendar is ready to use.',
-            vibrate: [100, 50, 100],
-            tag: 'welcome-msg',
-            requireInteraction: true
-        };
-
-        if (!('serviceWorker' in navigator)) {
-            try { new Notification(title, options); } catch (e) { console.error('Notification fallback failed', e); }
-            return;
-        }
-
-        // Wait for the SW to be active before showing (covers “open from home screen”)
-        navigator.serviceWorker.ready
-            .then(reg => reg.showNotification(title, options))
-            .catch(err => {
-                console.error('SW notification failed', err);
-                try { new Notification(title, options); } catch (e) { console.error('Notification fallback failed', e); }
-            });
+        // Only trigger welcome if requested explicitly or first time logic, 
+        // but here it is just a permission test. 
+        // Commenting out welcome message to avoid spam on reload, 
+        // or just keep it as "Test Notification" if user clicks something.
+        // For now, let's just logging.
+        console.log("Notifications initialized.");
     };
 
     // Permission Logic
@@ -56,10 +43,73 @@ function initNotifications() {
         Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
                 triggerWelcome();
+                // Send a test notification to confirm it works
+                 if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification('Notifications Enabled', {
+                            body: 'You will now receive reminders for your events.',
+                            icon: 'assets/icons/icon-192.png',
+                             vibrate: [100, 50, 100]
+                        });
+                    });
+                }
             }
         }).catch(err => console.error('Permission request failed', err));
     }, { once: true });
 }
+
+// Reminder Checker Loop
+function initReminderCheck() {
+    // Check every minute
+    setInterval(checkReminders, 60000);
+    // Initial check
+    setTimeout(checkReminders, 5000); 
+}
+
+function checkReminders() {
+    if (Notification.permission !== 'granted') return;
+
+    const now = new Date();
+    const dateString = CalendarApp.formatDateForStorage(now);
+    const timeString = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
+
+    // Get items
+    const tasks = CalendarApp.Storage.getTasksForDate(dateString);
+    const deadlines = CalendarApp.Storage.getDeadlinesForDate(dateString);
+
+    const items = [...tasks, ...deadlines];
+
+    items.forEach(item => {
+        if (item.time === timeString) {
+            // It's time!
+            sendNotification(item);
+        }
+    });
+}
+
+function sendNotification(item) {
+    const title = `Reminder: ${item.name}`;
+    const options = {
+        body: item.description || `It's time for ${item.name}`,
+        icon: 'assets/icons/icon-192.png',
+        badge: 'assets/icons/icon-192.png',
+        vibrate: [200, 100, 200],
+        tag: `reminder-${item.id}`, // Prevent duplicate notifications
+        renotify: true
+    };
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(title, options);
+        }).catch(err => {
+             console.error('SW notification failed', err);
+             new Notification(title, options);
+        });
+    } else {
+        new Notification(title, options);
+    }
+}
+
 
 // Theme Management
 function initTheme() {
