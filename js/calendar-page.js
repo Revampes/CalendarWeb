@@ -10,6 +10,7 @@ const CANVAS_BASE_URL_KEY = 'canvas_base_url';
 const DEFAULT_CANVAS_BASE_URL = 'https://canvas.instructure.com/';
 const CANVAS_BASE_PLACEHOLDER = 'Optional (defaults to canvas.instructure.com)';
 const DAILY_REMINDER_KEY = 'calendar_daily_reminder_shown';
+const DAILY_BRIEFING_SENT_KEY = 'calendar_daily_briefing_last_sent';
 const REMINDER_LOOKAHEAD_DAYS = 1;
 const DATA_SEEDED_FLAG = 'calendar_seeded';
 
@@ -261,6 +262,7 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
 
             renderAll();
             maybeShowDailyReminder();
+            initNotificationLoop();
 
             function renderAll() {
                 renderCalendar();
@@ -1443,6 +1445,102 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 }
                 elements.dailyReminderList.innerHTML = summaryItems.map(item => `<li class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800">${item}</li>`).join('');
                 elements.dailyReminderModal.classList.remove('hidden');
+            }
+
+            function initNotificationLoop() {
+                if (!('Notification' in window)) {
+                    return;
+                }
+
+                if (Notification.permission === 'default') {
+                    const requestOnce = () => {
+                        Notification.requestPermission().finally(() => {
+                            document.removeEventListener('click', requestOnce);
+                        });
+                    };
+                    document.addEventListener('click', requestOnce, { once: true });
+                }
+
+                const runChecks = () => {
+                    if (Notification.permission !== 'granted') {
+                        return;
+                    }
+                    sendDailyBriefingIfNeeded();
+                };
+
+                setInterval(runChecks, 60000);
+                setTimeout(runChecks, 5000);
+            }
+
+            function sendDailyBriefingIfNeeded() {
+                const settings = JSON.parse(localStorage.getItem('calendar_settings') || '{}');
+                if (!settings.dailyBriefingEnabled || !settings.dailyBriefingTime) {
+                    return;
+                }
+
+                const now = new Date();
+                const currentTime = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                if (settings.dailyBriefingTime !== currentTime) {
+                    return;
+                }
+
+                const todayKey = formatDateForStorage(now);
+                const sentKey = `${todayKey}|${currentTime}`;
+                if (localStorage.getItem(DAILY_BRIEFING_SENT_KEY) === sentKey) {
+                    return;
+                }
+
+                const schedulesToday = getSchedules().filter(item => item.date === todayKey);
+                const deadlinesToday = getDeadlines().filter(item => item.date === todayKey);
+                const todosToday = getTodos().filter(item => item.date === todayKey && !item.completed);
+
+                const upcomingDeadlines = getDeadlines().filter(item => {
+                    const delta = daysBetween(new Date(item.date), normaliseDate(now));
+                    return delta > 0 && delta <= 3;
+                });
+
+                const summaryLines = [];
+                const totalToday = schedulesToday.length + deadlinesToday.length + todosToday.length;
+                summaryLines.push(`Today you have ${totalToday} item${totalToday === 1 ? '' : 's'}.`);
+
+                if (schedulesToday.length) {
+                    summaryLines.push(`Schedules: ${schedulesToday.map(item => item.name || item.title).slice(0, 3).join(', ')}`);
+                }
+
+                if (deadlinesToday.length) {
+                    summaryLines.push(`Deadlines today: ${deadlinesToday.map(item => item.name || item.title).join(', ')}`);
+                }
+
+                if (upcomingDeadlines.length) {
+                    const soonList = upcomingDeadlines.map(item => {
+                        const label = item.name || item.title || 'Deadline';
+                        return `${label} (${formatReadableDate(item.date)})`;
+                    });
+                    summaryLines.push(`Due soon: ${soonList.join(', ')}`);
+                }
+
+                const body = summaryLines.filter(Boolean).join('\n') || 'No planned items for today.';
+                dispatchNotification('Daily Schedule Briefing', {
+                    body,
+                    icon: 'assets/icons/icon.svg',
+                    tag: `daily-briefing-${todayKey}`,
+                    requireInteraction: true
+                });
+
+                localStorage.setItem(DAILY_BRIEFING_SENT_KEY, sentKey);
+            }
+
+            function dispatchNotification(title, options) {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready
+                        .then(reg => reg.showNotification(title, options))
+                        .catch(() => {
+                            new Notification(title, options);
+                        });
+                    return;
+                }
+
+                new Notification(title, options);
             }
 
             function closeDailyReminder(markComplete = true) {
