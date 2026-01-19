@@ -1468,8 +1468,14 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                     sendDailyBriefingIfNeeded();
                 };
 
-                setInterval(runChecks, 60000);
-                setTimeout(runChecks, 5000);
+                const loop = () => {
+                    runChecks();
+                    const now = Date.now();
+                    const msUntilNextSecond = 1000 - (now % 1000);
+                    setTimeout(loop, msUntilNextSecond);
+                };
+
+                setTimeout(loop, 500);
             }
 
             function sendDailyBriefingIfNeeded() {
@@ -1480,7 +1486,8 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
 
                 const now = new Date();
                 const currentTime = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                if (settings.dailyBriefingTime !== currentTime) {
+                const seconds = now.getSeconds();
+                if (settings.dailyBriefingTime !== currentTime || seconds !== 0) {
                     return;
                 }
 

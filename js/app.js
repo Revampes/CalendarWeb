@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initReminderCheck();
 });
 
+const DAILY_BRIEFING_SENT_KEY = 'calendar_daily_briefing_last_sent';
+
 // Notifications
 function initNotifications() {
     console.log("[Debug] Initializing notifications...");
@@ -89,28 +91,40 @@ function sendTestNotification() {
 // Reminder Checker Loop
 function initReminderCheck() {
     console.log("[Debug] Starting reminder check loop...");
-    // Check every minute
-    setInterval(checkReminders, 60000);
-    // Initial check after 5s
-    setTimeout(checkReminders, 5000); 
+
+    const tick = () => {
+        try {
+            checkReminders();
+        } finally {
+            // Align to the next second boundary to avoid drift
+            const now = Date.now();
+            const msUntilNextSecond = 1000 - (now % 1000);
+            setTimeout(tick, msUntilNextSecond);
+        }
+    };
+
+    // Start shortly after load, then self-schedule
+    setTimeout(tick, 500);
 }
 
 function checkReminders() {
-    console.log("[Debug] Checking for reminders...", new Date().toLocaleTimeString());
-    
     if (Notification.permission !== 'granted') {
-        console.log("[Debug] Cannot check reminders: Permission not granted.");
         return;
     }
 
     const now = new Date();
     const dateString = CalendarApp.formatDateForStorage(now);
-    const timeString = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
+    const timeHM = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
+    const seconds = now.getSeconds();
 
-    // --- Daily Briefing Check ---
+    // --- Daily Briefing Check (fire exactly at HH:MM:00, once per day) ---
     const settings = JSON.parse(localStorage.getItem('calendar_settings') || '{}');
-    if (settings.dailyBriefingEnabled && settings.dailyBriefingTime === timeString) {
-        sendDailyBriefing(dateString);
+    if (settings.dailyBriefingEnabled && settings.dailyBriefingTime === timeHM && seconds === 0) {
+        const sentKey = `${dateString}|${settings.dailyBriefingTime}`;
+        if (localStorage.getItem(DAILY_BRIEFING_SENT_KEY) !== sentKey) {
+            sendDailyBriefing(dateString);
+            localStorage.setItem(DAILY_BRIEFING_SENT_KEY, sentKey);
+        }
     }
 
     // --- Task/Deadline Reminders ---
@@ -119,16 +133,20 @@ function checkReminders() {
     const items = [...tasks, ...deadlines];
 
     items.forEach(item => {
-        // Exact Time
-        if (item.time === timeString) {
-            sendNotification(item, false);
+        if (!item.time) {
+            return;
         }
+
+        // Exact Time
+        if (item.time === timeHM && seconds === 0) {
+            sendNotification(item, false);
+            return;
+        }
+
         // 5 Minutes Before
-        if (item.time) {
-            const warningTime = subtractMinutes(item.time, 5);
-            if (warningTime === timeString) {
-                sendNotification(item, true);
-            }
+        const warningTime = subtractMinutes(item.time, 5);
+        if (warningTime === timeHM && seconds === 0) {
+            sendNotification(item, true);
         }
     });
 }
