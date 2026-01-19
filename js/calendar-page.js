@@ -1487,7 +1487,8 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 const now = new Date();
                 const currentTime = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                 const seconds = now.getSeconds();
-                if (settings.dailyBriefingTime !== currentTime || seconds !== 0) {
+                const withinSendWindow = seconds >= 0 && seconds <= 3;
+                if (settings.dailyBriefingTime !== currentTime || !withinSendWindow) {
                     return;
                 }
 

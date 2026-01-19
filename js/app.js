@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const DAILY_BRIEFING_SENT_KEY = 'calendar_daily_briefing_last_sent';
+let REMINDER_SENT_CACHE = new Set();
+let REMINDER_CACHE_DATE = null;
 
 // Notifications
 function initNotifications() {
@@ -116,10 +118,16 @@ function checkReminders() {
     const dateString = CalendarApp.formatDateForStorage(now);
     const timeHM = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
     const seconds = now.getSeconds();
+    const withinSendWindow = seconds >= 0 && seconds <= 3; // tolerate throttling/drift
+
+    if (REMINDER_CACHE_DATE !== dateString) {
+        REMINDER_CACHE_DATE = dateString;
+        REMINDER_SENT_CACHE = new Set();
+    }
 
     // --- Daily Briefing Check (fire exactly at HH:MM:00, once per day) ---
     const settings = JSON.parse(localStorage.getItem('calendar_settings') || '{}');
-    if (settings.dailyBriefingEnabled && settings.dailyBriefingTime === timeHM && seconds === 0) {
+    if (settings.dailyBriefingEnabled && settings.dailyBriefingTime === timeHM && withinSendWindow) {
         const sentKey = `${dateString}|${settings.dailyBriefingTime}`;
         if (localStorage.getItem(DAILY_BRIEFING_SENT_KEY) !== sentKey) {
             sendDailyBriefing(dateString);
@@ -137,15 +145,18 @@ function checkReminders() {
             return;
         }
 
-        // Exact Time
-        if (item.time === timeHM && seconds === 0) {
+        const keyNow = `${item.id}|${timeHM}|now`;
+        const keyEarly = `${item.id}|${timeHM}|early`;
+
+        if (item.time === timeHM && withinSendWindow && !REMINDER_SENT_CACHE.has(keyNow)) {
+            REMINDER_SENT_CACHE.add(keyNow);
             sendNotification(item, false);
             return;
         }
 
-        // 5 Minutes Before
         const warningTime = subtractMinutes(item.time, 5);
-        if (warningTime === timeHM && seconds === 0) {
+        if (warningTime === timeHM && withinSendWindow && !REMINDER_SENT_CACHE.has(keyEarly)) {
+            REMINDER_SENT_CACHE.add(keyEarly);
             sendNotification(item, true);
         }
     });
