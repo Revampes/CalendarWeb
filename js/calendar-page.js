@@ -15,14 +15,14 @@ const REMINDER_LOOKAHEAD_DAYS = 1;
 const DATA_SEEDED_FLAG = 'calendar_seeded';
 
         const TASK_TYPE_COLORS = {
-            lecture: '#3b82f6',
-            tutorial: '#10b981',
-            training: '#f59e0b',
-            meeting: '#8b5cf6',
-            assignment: '#ef4444',
-            exam: '#ec4899',
-            break: '#6366f1',
-            other: '#6b7280'
+            lecture: '#3f3f46', // Zinc-700
+            tutorial: '#52525b', // Zinc-600
+            training: '#71717a', // Zinc-500
+            meeting: '#a1a1aa', // Zinc-400
+            assignment: '#d4d4d8', // Zinc-300
+            exam: '#27272a', // Zinc-800
+            break: '#e4e4e7', // Zinc-200
+            other: '#f4f4f5'  // Zinc-100
         };
 
         const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -39,7 +39,8 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             const state = {
                 today: normaliseDate(new Date()),
                 current: normaliseDate(new Date()),
-                selected: normaliseDate(new Date())
+                selected: normaliseDate(new Date()),
+                view: 'month'
             };
 
             const elements = {
@@ -52,6 +53,9 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 todayButton: document.getElementById('today-btn'),
                 currentMonthLabel: document.getElementById('current-month'),
                 calendarGrid: document.getElementById('calendar-grid'),
+                calendarHeaderRow: document.getElementById('calendar-header-row'),
+                viewMonthButton: document.getElementById('view-month-btn'),
+                viewWeekButton: document.getElementById('view-week-btn'),
                 selectedDateDisplay: document.getElementById('selected-date-display'),
                 todoDateDisplay: document.getElementById('todo-date-display'),
                 scheduleContainer: document.getElementById('schedule-container'),
@@ -131,16 +135,51 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
             });
 
             elements.prevMonth.addEventListener('click', () => {
-                const updated = new Date(state.current.getFullYear(), state.current.getMonth() - 1, 1);
-                state.current = normaliseDate(updated);
+                if (state.view === 'week') {
+                    const updated = new Date(state.current);
+                    updated.setDate(updated.getDate() - 7);
+                    state.current = normaliseDate(updated);
+                } else {
+                    const updated = new Date(state.current.getFullYear(), state.current.getMonth() - 1, 1);
+                    state.current = normaliseDate(updated);
+                }
                 renderAll();
             });
 
             elements.nextMonth.addEventListener('click', () => {
-                const updated = new Date(state.current.getFullYear(), state.current.getMonth() + 1, 1);
-                state.current = normaliseDate(updated);
+                 if (state.view === 'week') {
+                    const updated = new Date(state.current);
+                    updated.setDate(updated.getDate() + 7);
+                    state.current = normaliseDate(updated);
+                } else {
+                    const updated = new Date(state.current.getFullYear(), state.current.getMonth() + 1, 1);
+                    state.current = normaliseDate(updated);
+                }
                 renderAll();
             });
+
+            if (elements.viewMonthButton && elements.viewWeekButton) {
+                elements.viewMonthButton.addEventListener('click', () => {
+                    state.view = 'month';
+                    updateViewButtons();
+                    renderAll();
+                });
+                elements.viewWeekButton.addEventListener('click', () => {
+                    state.view = 'week';
+                    updateViewButtons();
+                    renderAll();
+                });
+            }
+
+            function updateViewButtons() {
+                if (state.view === 'month') {
+                    elements.viewMonthButton.className = "px-3 py-1 text-xs font-medium rounded shadow-sm bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-100 transition-all";
+                    elements.viewWeekButton.className = "px-3 py-1 text-xs font-medium rounded text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all";
+                } else {
+                    elements.viewWeekButton.className = "px-3 py-1 text-xs font-medium rounded shadow-sm bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-100 transition-all";
+                    elements.viewMonthButton.className = "px-3 py-1 text-xs font-medium rounded text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all";
+                }
+            }
 
             elements.todayButton.addEventListener('click', () => {
                 state.current = normaliseDate(new Date());
@@ -266,14 +305,22 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
 
             function renderAll() {
                 renderCalendar();
-                renderScheduleList();
+                if (elements.scheduleContainer) renderScheduleList();
                 renderDeadlinesList();
                 renderTodosList();
                 renderDailySchedule();
-                renderTodaySummary();
+                // renderTodaySummary(); // Removed in new layout
             }
 
             function renderCalendar() {
+                if (state.view === 'week') {
+                    renderWeekView();
+                    return;
+                }
+
+                if (elements.calendarHeaderRow) elements.calendarHeaderRow.style.display = 'grid';
+                elements.calendarGrid.className = 'mt-2 grid grid-cols-7 gap-2';
+
                 const year = state.current.getFullYear();
                 const month = state.current.getMonth();
 
@@ -302,6 +349,371 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 }
             }
 
+            // Interval for week view time indicator
+            setInterval(updateWeekTimeIndicator, 60000);
+
+            function updateWeekTimeIndicator() {
+                const indicator = document.getElementById('week-time-indicator');
+                if (!indicator) return;
+
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                
+                // Grid starts at 6:00 AM (hour 6)
+                // Each hour is 80px (two 40px slots + borders etc)
+                // NOTE: In renderWeekView, we create rows. 
+                // Each 30min slot has min-h-[40px] and border-b.
+                // So 1 hour is roughly 80px + borders.
+                
+                if (hours < 6 || hours > 22) {
+                    indicator.classList.add('hidden');
+                    return;
+                }
+
+                // Precise calculation matching the CSS grid
+                // exact pixel height might vary slightly due to borders, but 80px is a good approximation for min-heights
+                // We should rely on standard box model. border-b is 1px usually.
+                // Let's assume approx.
+                const slotHeight = 40; // min-height of 30min slot
+                // There is border-b which is 1px.
+                // We'll stick to 40px + 1px estimate? No, flex layout might stretch.
+                // Given min-h-[40px], usually it stays at 40px if content empty.
+                
+                // Let's try simple calculation first.
+                // The header row is separate. gridBody starts at 6 AM.
+                
+                const startHour = 6;
+                const minutesDecimal = minutes / 60;
+                const hoursFromStart = (hours - startHour) + minutesDecimal;
+                
+                // 40px per 30min slot means 80px per hour.
+                // Plus about 1px border per slot?
+                // Let's rely on relative placement percentage if possible? No.
+                // Let's try just pixels.
+                
+                // Actually, the rows have 'min-h-[40px]'. 
+                // This implies strict 40px if empty.
+                // And there's a border.
+                // However, border-b is on the row.
+                // So total height of one 30min block is roughly 40px + 1px border.
+                
+                const pixelPerMinute = (40 + 1) / 30; // 41px per 30 mins -> 1.36px/min
+                // Or simply:
+                const topPx = hoursFromStart * 60 * ((40 + 1) / 30); 
+                // Wait, (40+1)/30 = 41/30 = 1.366
+                // Let's try rough estimation of 82px per hour.
+                
+                indicator.style.top = `${Math.floor(hoursFromStart * 81)}px`; // 81px per hour (40px content + 1px border approx for 2 slots)
+                indicator.classList.remove('hidden');
+            }
+
+            function renderWeekView() {
+                if (elements.calendarHeaderRow) elements.calendarHeaderRow.style.display = 'none';
+                
+                const currentDay = state.current.getDay(); 
+                const weekStart = new Date(state.current);
+                weekStart.setDate(state.current.getDate() - currentDay);
+                
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                const startMonth = MONTH_NAMES[weekStart.getMonth()].substring(0, 3);
+                const endMonth = MONTH_NAMES[weekEnd.getMonth()].substring(0, 3);
+                const yearStr = weekStart.getFullYear() === weekEnd.getFullYear() ? weekStart.getFullYear() : `${weekStart.getFullYear()}-${weekEnd.getFullYear()}`;
+                
+                if (startMonth === endMonth) {
+                     elements.currentMonthLabel.textContent = `${startMonth} ${weekStart.getDate()} - ${weekEnd.getDate()}, ${yearStr}`;
+                } else {
+                     elements.currentMonthLabel.textContent = `${startMonth} ${weekStart.getDate()} - ${endMonth} ${weekEnd.getDate()}, ${yearStr}`;
+                }
+
+                elements.calendarGrid.innerHTML = '';
+                elements.calendarGrid.className = 'mt-2 flex flex-col border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800';
+                
+                // Create a container for the header that will be sticky
+                const headerContainer = document.createElement('div');
+                headerContainer.className = 'sticky top-0 z-40 bg-white dark:bg-gray-800'; // Sticky header
+
+                const headerRow = document.createElement('div');
+                headerRow.className = 'flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800';
+                
+                const timeHeader = document.createElement('div');
+                timeHeader.className = 'w-16 flex-shrink-0 border-r border-gray-200 dark:border-gray-700';
+                headerRow.appendChild(timeHeader);
+                
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(weekStart);
+                    dayDate.setDate(weekStart.getDate() + i);
+                    
+                    const dayCol = document.createElement('div');
+                    dayCol.className = 'flex-1 py-1 sm:py-2 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0';
+                    if (isSameDay(dayDate, state.today)) {
+                         dayCol.className += ' bg-gray-100 dark:bg-gray-800';
+                    }
+                    
+                    dayCol.innerHTML = `
+                        <div class="week-day-header cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1 transition-colors" data-date="${formatDateForStorage(dayDate)}">
+                             <div class="text-[10px] sm:text-xs uppercase font-semibold text-gray-500 dark:text-gray-400 pointer-events-none">${days[i]}</div>
+                             <div class="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100 ${isSameDay(dayDate, state.today) ? 'text-primary-600 dark:text-primary-400' : ''} pointer-events-none">${dayDate.getDate()}</div>
+                        </div>
+                    `;
+                    headerRow.appendChild(dayCol);
+                }
+                headerContainer.appendChild(headerRow);
+                
+                // Add click handlers to week headers
+                headerRow.querySelectorAll('.week-day-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const dateStr = header.getAttribute('data-date');
+                        state.selected = normaliseDate(new Date(dateStr));
+                        renderAll();
+                    });
+                });
+                
+                const gridBody = document.createElement('div');
+                gridBody.id = 'week-grid-body';
+                gridBody.className = 'flex flex-col relative overflow-y-auto max-h-[600px] scrollbar-thin';
+                gridBody.appendChild(headerContainer); // Put header INSIDE scroll container so widths match, but stick it
+
+
+                // Current Time Indicator
+                const timeIndicator = document.createElement('div');
+                timeIndicator.id = 'week-time-indicator';
+                timeIndicator.className = 'absolute w-full border-t-2 border-red-500 z-10 pointer-events-none hidden';
+                timeIndicator.innerHTML = '<div class="absolute -top-[5px] left-[58px] w-2.5 h-2.5 bg-red-500 rounded-full"></div>';
+                gridBody.appendChild(timeIndicator);
+                
+                // 6 AM to 10 PM in 30 minute intervals
+                const slots = [];
+                for (let h = 6; h <= 22; h++) {
+                    slots.push({ hour: h, minute: 0 });
+                    slots.push({ hour: h, minute: 30 });
+                }
+                
+                slots.forEach(({ hour, minute }) => {
+                    const row = document.createElement('div');
+                    row.className = 'flex border-b border-gray-100 dark:border-gray-700/50 min-h-[40px]';
+                    
+                    const timeLabel = document.createElement('div');
+                    timeLabel.className = 'w-16 flex-shrink-0 flex items-start justify-center pt-2 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50';
+                    const period = hour >= 12 ? 'PM' : 'AM';
+                    const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+                    // Only show time label for on-the-hour slots
+                    timeLabel.textContent = minute === 0 ? `${displayHour} ${period}` : '';
+                    
+                    if (minute === 30) {
+                        timeLabel.className += ' text-gray-400 font-light';
+                        row.className += ' bg-gray-50/20 dark:bg-gray-800/20 border-b border-gray-200 dark:border-gray-600'; // Stronger line for half hours (which is the :00 mark of next hour)
+                    } else {
+                        row.classList.add('border-b-gray-100', 'dark:border-b-gray-700/50'); // Lighter line for hour (middle of hour)
+                    }
+
+                    row.appendChild(timeLabel);
+                    
+                    for (let i = 0; i < 7; i++) {
+                         const slotDate = new Date(weekStart);
+                         slotDate.setDate(weekStart.getDate() + i);
+                         const dateKey = formatDateForStorage(slotDate);
+                         
+                         const slot = document.createElement('div');
+                         slot.className = 'flex-1 relative border-r border-gray-100 dark:border-gray-700/50 last:border-r-0 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors group';
+                         slot.setAttribute('data-time', `${hour}:${minute}`);
+                         slot.setAttribute('data-date', dateKey);
+                         
+                         if (isSameDay(slotDate, state.selected)) {
+                             slot.classList.add('bg-gray-100/50', 'dark:bg-gray-800/50');
+                         }
+
+                         // Allow dropping on slot
+                         slot.addEventListener('dragover', (e) => {
+                             e.preventDefault(); // Necessary to allow dropping
+                             e.dataTransfer.dropEffect = 'move';
+                             slot.classList.add('bg-gray-200', 'dark:bg-gray-700');
+                         });
+
+                         slot.addEventListener('dragleave', (e) => {
+                             slot.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                         });
+
+                         slot.addEventListener('drop', (e) => {
+                             e.preventDefault();
+                             slot.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                             const data = e.dataTransfer.getData('text/plain');
+                             if (data) {
+                                 try {
+                                     const { id, originalDate, originalStart, durationMinutes } = JSON.parse(data);
+                                     
+                                     // Calculate new start time
+                                     const newStartHour = hour;
+                                     const newStartMinute = minute;
+                                     
+                                     // Calculate new end time based on duration
+                                     let endTotalMinutes = (newStartHour * 60) + newStartMinute + durationMinutes;
+                                     const newEndHour = Math.floor(endTotalMinutes / 60);
+                                     const newEndMinute = endTotalMinutes % 60;
+                                     
+                                     const newStartTime = `${newStartHour.toString().padStart(2, '0')}:${newStartMinute.toString().padStart(2, '0')}`;
+                                     const newEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinute.toString().padStart(2, '0')}`;
+                                     
+                                     // Update schedule
+                                     const schedules = getSchedules();
+                                     const scheduleIndex = schedules.findIndex(s => s.id === id);
+                                     
+                                     if (scheduleIndex > -1) {
+                                         schedules[scheduleIndex].date = dateKey;
+                                         schedules[scheduleIndex].startTime = newStartTime;
+                                         schedules[scheduleIndex].endTime = newEndTime;
+                                         saveItems(STORAGE_KEYS.schedules, schedules);
+                                         renderAll();
+                                     }
+                                 } catch (err) {
+                                     console.error('Drop error', err);
+                                 }
+                             }
+                         });
+
+                         slot.addEventListener('click', (e) => {
+                             if(e.target === slot) {
+                                state.selected = normaliseDate(slotDate);
+                                renderAll(); 
+                                openAddModal('schedule'); 
+                                const endMin = minute === 30 ? 0 : 30;
+                                const endHour = minute === 30 ? hour + 1 : hour;
+                                document.getElementById('start-time').value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                                document.getElementById('end-time').value = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
+                             }
+                         });
+
+                         const schedules = getSchedules().filter(s => s.date === dateKey);
+                         const slotSchedules = schedules.filter(s => {
+                             const startH = parseInt(s.startTime.split(':')[0], 10);
+                             const startM = parseInt(s.startTime.split(':')[1], 10);
+                             // Check if start time falls within this 30 min slot
+                             if (startH === hour) {
+                                 if (minute === 0) return startM < 30;
+                                 return startM >= 30;
+                             }
+                             return false; 
+                         });
+                         
+                         slotSchedules.forEach(schedule => {
+                             const item = document.createElement('div');
+                             // Style similar to daily task-card
+                             item.className = 'absolute left-0.5 right-0.5 rounded-lg px-2 py-1 cursor-pointer z-10 overflow-hidden border transition-all duration-200 group-hover:z-30 hover:shadow-lg hover:scale-[1.02] flex flex-col justify-start';
+                             
+                             // Enable Drag
+                             item.setAttribute('draggable', 'true');
+                             
+                             let colorHex;
+                             if (schedule.color) {
+                                  colorHex = schedule.color;
+                             } else {
+                                  colorHex = TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
+                             }
+                             
+                             // Convert hex to rgb for rgba
+                             let r=0, g=0, b=0;
+                             if(colorHex.startsWith('#')) {
+                                 let hex = colorHex.substring(1);
+                                 if(hex.length === 3) hex = hex.split('').map(x=>x+x).join('');
+                                 const bigint = parseInt(hex, 16);
+                                 r = (bigint >> 16) & 255;
+                                 g = (bigint >> 8) & 255;
+                                 b = bigint & 255;
+                             }
+
+                             // Transparent background with border
+                             item.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.15)`;
+                             item.style.borderColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
+                             item.style.borderLeftWidth = '3px'; // Accent on left
+                             item.style.borderLeftColor = colorHex;
+                             
+                             // Neon hover effect via box-shadow
+                             item.onmouseenter = () => {
+                                 item.style.boxShadow = `0 0 10px rgba(${r}, ${g}, ${b}, 0.6), inset 0 0 5px rgba(${r}, ${g}, ${b}, 0.1)`;
+                                 item.style.zIndex = '50';
+                             };
+                             item.onmouseleave = () => {
+                                 item.style.boxShadow = '';
+                                 item.style.zIndex = '10';
+                             };
+                             
+                             const startH = parseInt(schedule.startTime.split(':')[0], 10);
+                             const startM = parseInt(schedule.startTime.split(':')[1], 10);
+                             const endH = parseInt(schedule.endTime.split(':')[0], 10);
+                             const endM = parseInt(schedule.endTime.split(':')[1], 10);
+                             
+                             let durationMinutes = ((endH * 60) + endM) - ((startH * 60) + startM);
+                             if (durationMinutes < 15) durationMinutes = 30; 
+                             
+                             // Drag start
+                             item.addEventListener('dragstart', (e) => {
+                                 e.dataTransfer.setData('text/plain', JSON.stringify({
+                                     id: schedule.id,
+                                     originalDate: schedule.date,
+                                     originalStart: schedule.startTime,
+                                     durationMinutes: durationMinutes
+                                 }));
+                                 item.style.opacity = '0.5';
+                                 e.dataTransfer.effectAllowed = 'move';
+                             });
+                             
+                             item.addEventListener('dragend', () => {
+                                 item.style.opacity = '1';
+                             }); 
+                             
+                             // 40px height per 30 mins => 1.33px per minute
+                             const pxPerMin = 40 / 30;
+                             item.style.height = `${Math.max(24, durationMinutes * pxPerMin - 2)}px`; 
+                             
+                             // Offset from top of slot
+                             const minuteOffset = startM % 30;
+                             item.style.top = `${minuteOffset * pxPerMin + 1}px`;
+
+                             // Content
+                             const nameEl = document.createElement('div');
+                             nameEl.className = 'text-[10px] font-bold leading-3 whitespace-normal break-words line-clamp-2 md:line-clamp-3 lg:line-clamp-4';
+                             nameEl.textContent = schedule.name;
+                             nameEl.style.color = colorHex; 
+
+                             const timeEl = document.createElement('div');
+                             timeEl.className = 'text-[9px] text-gray-600 dark:text-gray-300 opacity-90 leading-tight'; // Removed truncate
+                             timeEl.textContent = `${schedule.startTime}-${schedule.endTime}`;
+
+                             item.appendChild(nameEl);
+                             item.appendChild(timeEl);
+
+                             // Add location if enough height
+                             if (durationMinutes >= 60 && schedule.location) {
+                                  const locEl = document.createElement('div');
+                                  locEl.className = 'text-[9px] text-gray-500 dark:text-gray-400 opacity-80 mt-0.5 truncate';
+                                  locEl.innerHTML = `<i class="fa fa-map-marker"></i> ${schedule.location}`;
+                                  item.appendChild(locEl);
+                             }
+
+                             item.title = `${schedule.name} (${schedule.startTime} - ${schedule.endTime})`;
+                             
+                             item.addEventListener('click', (e) => {
+                                 e.stopPropagation();
+                                 openEditSchedule(schedule);
+                             });
+                             
+                             slot.appendChild(item);
+                         });
+                         
+                         row.appendChild(slot);
+                    }
+                    
+                    gridBody.appendChild(row);
+                });
+                elements.calendarGrid.appendChild(gridBody);
+                
+                // Update indicator position immediately
+                updateWeekTimeIndicator();
+            }
+
             function createDayCell(date, isOtherMonth) {
                 const dateKey = formatDateForStorage(date);
                 const schedules = getSchedules().filter(schedule => schedule.date === dateKey);
@@ -327,40 +739,12 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 dayNumber.textContent = date.getDate();
                 cell.appendChild(dayNumber);
 
-                if (deadlines.length > 0) {
-                    const marker = document.createElement('div');
-                    marker.className = 'deadline-marker';
-                    marker.title = `${deadlines.length} deadline${deadlines.length > 1 ? 's' : ''}`;
-                    cell.appendChild(marker);
-                }
-
-                if (schedules.length > 0 || deadlines.length > 0) {
-                    const indicators = document.createElement('div');
-                    indicators.className = 'calendar-day-meta';
-
-                    schedules.slice(0, 3).forEach(schedule => {
-                        const dot = document.createElement('span');
-                        dot.className = 'task-dot';
-                        dot.style.backgroundColor = TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
-                        indicators.appendChild(dot);
-                    });
-
-                    deadlines.slice(0, 2).forEach(() => {
-                        const dot = document.createElement('span');
-                        dot.className = 'task-dot';
-                        dot.style.backgroundColor = TASK_TYPE_COLORS.assignment;
-                        indicators.appendChild(dot);
-                    });
-
-                    const totalItems = schedules.length + deadlines.length;
-                    if (totalItems > 5) {
-                        const more = document.createElement('span');
-                        more.className = 'text-xs text-gray-500 dark:text-gray-400';
-                        more.textContent = `+${totalItems - 5}`;
-                        indicators.appendChild(more);
-                    }
-
-                    cell.appendChild(indicators);
+                const totalItems = schedules.length + deadlines.length;
+                if (totalItems > 0) {
+                     const dot = document.createElement('div');
+                     dot.className = 'absolute bottom-1 right-1 flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-sm bg-red-600'; // Right bottom, always red
+                     dot.textContent = totalItems;
+                     cell.appendChild(dot);
                 }
 
                 cell.addEventListener('click', () => {
@@ -599,28 +983,108 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
 
                 elements.dailySchedule.innerHTML = '';
 
-                const hours = Array.from({ length: 17 }, (_, index) => 6 + index);
+                // Dynamic Range Calculation
+                let minHour = 8;
+                let maxHour = 18;
+
+                if (schedules.length > 0) {
+                    const startHours = schedules.map(s => parseInt(s.startTime.split(':')[0], 10));
+                    const endHours = schedules.map(s => {
+                        const parts = s.endTime.split(':');
+                        const h = parseInt(parts[0], 10);
+                        const m = parseInt(parts[1], 10);
+                        return m > 0 ? h + 1 : h;
+                    });
+                     
+                    const minStart = Math.min(...startHours);
+                    const maxEnd = Math.max(...endHours);
+                     
+                    minHour = Math.min(8, minStart - 1);
+                    maxHour = Math.max(18, maxEnd + 1); 
+                }
+                
+                minHour = Math.max(0, minHour);
+                maxHour = Math.min(23, maxHour); 
+                
+                const hours = [];
+                for(let h = minHour; h <= maxHour; h++) {
+                    hours.push(h);
+                }
+
                 hours.forEach(hour => {
                     const slot = document.createElement('div');
-                    slot.className = 'flex items-start gap-4';
+                    // Bright separation line on top of each hour block
+                    slot.className = 'flex items-stretch gap-4 border-t border-gray-300 dark:border-gray-600 min-h-[80px] py-4';
 
                     const label = document.createElement('div');
-                    label.className = 'w-16 text-xs uppercase text-gray-500 dark:text-gray-400 pt-1';
+                    label.className = 'w-16 text-sm font-bold text-gray-500 dark:text-gray-400 pt-1 text-right pr-3 shrink-0 uppercase tracking-wider whitespace-nowrap';
                     label.textContent = formatHour(hour);
 
                     const content = document.createElement('div');
-                    content.className = 'flex-1 space-y-2';
+                    content.className = 'flex-1 space-y-3 min-w-0';
 
                     const matches = schedules.filter(schedule => parseInt(schedule.startTime.split(':')[0], 10) === hour);
                     matches.forEach(schedule => {
-                        const pill = document.createElement('div');
-                        pill.className = 'schedule-pill inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-900 border';
-                        const color = TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
-                        pill.style.backgroundColor = `${color}22`;
-                        pill.style.borderColor = `${color}55`;
-                        pill.textContent = `${schedule.startTime} • ${schedule.name}`;
-                        pill.addEventListener('click', () => openEditSchedule(schedule));
-                        content.appendChild(pill);
+                        const card = document.createElement('div');
+                        card.className = 'task-card cursor-pointer hover:scale-[1.01] transition-transform';
+                        
+                        let colorHex = schedule.color || TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
+                        try {
+                             const rgb = hexToRgb(colorHex);
+                             card.style.setProperty('--task-color', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+                        } catch(e) { console.error('Color parse error', e); }
+
+                        const header = document.createElement('div');
+                        header.className = 'flex items-start justify-between gap-3';
+
+                        const titleBlock = document.createElement('div');
+                        titleBlock.className = 'flex items-center gap-2 min-w-0';
+
+                        const dot = document.createElement('span');
+                        dot.className = 'task-dot shrink-0';
+                        dot.style.backgroundColor = colorHex;
+
+                        const name = document.createElement('div');
+                        name.className = 'text-sm font-semibold text-gray-800 dark:text-gray-100 truncate';
+                        name.textContent = schedule.name;
+
+                        titleBlock.appendChild(dot);
+                        titleBlock.appendChild(name);
+
+                        const time = document.createElement('div');
+                        time.className = 'text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded shrink-0';
+                        time.textContent = `${schedule.startTime} - ${schedule.endTime}`;
+
+                        header.appendChild(titleBlock);
+                        header.appendChild(time);
+                        card.appendChild(header);
+
+                        if (schedule.location) {
+                            const loc = document.createElement('div');
+                            loc.className = 'text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-1.5';
+                            loc.innerHTML = '<i class="fa fa-map-marker" aria-hidden="true"></i> ' + schedule.location;
+                            card.appendChild(loc);
+                        }
+                        
+                         if (schedule.description) {
+                            const desc = document.createElement('div');
+                            desc.className = 'text-xs text-gray-500 dark:text-gray-400 mt-2 pl-2 border-l-2 border-gray-200 dark:border-gray-700 line-clamp-2';
+                            desc.textContent = schedule.description;
+                            card.appendChild(desc);
+                        }
+
+                        if (schedule.link) {
+                            const link = document.createElement('a');
+                            link.className = 'text-xs text-primary-600 dark:text-primary-400 mt-2 inline-flex items-center gap-1 hover:underline';
+                            link.href = schedule.link;
+                            link.target = '_blank';
+                            link.innerHTML = '<i class="fa fa-external-link" aria-hidden="true"></i> Open';
+                            link.addEventListener('click', e => e.stopPropagation());
+                            card.appendChild(link);
+                        }
+
+                        card.addEventListener('click', () => openEditSchedule(schedule));
+                        content.appendChild(card);
                     });
 
                     slot.appendChild(label);
@@ -734,6 +1198,18 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 document.getElementById('edit-location').value = schedule.location || '';
                 document.getElementById('edit-description').value = schedule.description || '';
                 document.getElementById('edit-link').value = schedule.link || '';
+                
+                // Set color picker
+                const colorInput = document.getElementById('edit-task-color');
+                if (colorInput) {
+                    if (schedule.color) {
+                       colorInput.value = schedule.color;
+                    } else {
+                       // Default to type color
+                       colorInput.value = TASK_TYPE_COLORS[schedule.type] || TASK_TYPE_COLORS.other;
+                    }
+                }
+
                 closeAllModals();
                 elements.editTaskModal.classList.remove('hidden');
             }
@@ -777,6 +1253,7 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 const basePayload = {
                     name: event.target['task-name'].value.trim(),
                     type: event.target['task-type'].value,
+                    color: document.getElementById('task-color') ? document.getElementById('task-color').value : null,
                     startTime: event.target['start-time'].value,
                     endTime: event.target['end-time'].value,
                     location: event.target['location'].value.trim(),
@@ -851,6 +1328,7 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                     ...schedules[index],
                     name: event.target['edit-task-name'].value.trim(),
                     type: event.target['edit-task-type'].value,
+                    color: document.getElementById('edit-task-color') ? document.getElementById('edit-task-color').value : schedules[index].color,
                     date: event.target['edit-task-date'].value,
                     startTime: event.target['edit-start-time'].value,
                     endTime: event.target['edit-end-time'].value,
@@ -1622,19 +2100,15 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
         }
 
         function ensureSeedData() {
+            // Seeding disabled as per user request
+            localStorage.setItem(DATA_SEEDED_FLAG, 'true');
+            return;
+            
+            /* Legacy code removed
             migrateLegacySchedules();
             const alreadySeeded = localStorage.getItem(DATA_SEEDED_FLAG) === 'true';
-            const schedules = getSchedules();
-            const deadlines = getDeadlines();
-            const todos = getTodos();
-            const hasAnyData = schedules.length > 0 || deadlines.length > 0 || todos.length > 0;
-            if (alreadySeeded || hasAnyData) {
-                return;
-            }
-            saveItems(STORAGE_KEYS.schedules, createSampleSchedules());
-            saveItems(STORAGE_KEYS.deadlines, createSampleDeadlines());
-            saveItems(STORAGE_KEYS.todos, createSampleTodos());
-            localStorage.setItem(DATA_SEEDED_FLAG, 'true');
+            // ...
+            */
         }
 
         function migrateLegacySchedules() {
@@ -2189,27 +2663,27 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 }
                 pickerContainer.innerHTML = '';
                 const wrapper = document.createElement('div');
-                wrapper.className = 'mini-date-picker';
+                wrapper.className = 'mini-date-picker bg-white dark:bg-black rounded-lg p-2'; // Force black/white background
 
                 const header = document.createElement('div');
                 header.className = 'mini-date-picker__header';
                 const prevBtn = document.createElement('button');
                 prevBtn.type = 'button';
-                prevBtn.className = 'mini-date-picker__nav-btn';
-                prevBtn.innerHTML = '<i class="fa fa-chevron-left" aria-hidden="true"></i>';
+                prevBtn.className = 'mini-date-picker__nav-btn hover:bg-gray-100 dark:hover:bg-gray-800';
+                prevBtn.innerHTML = '<i class="fa fa-chevron-left text-gray-800 dark:text-gray-100" aria-hidden="true"></i>';
                 prevBtn.addEventListener('click', () => {
                     state.view = new Date(state.view.getFullYear(), state.view.getMonth() - 1, 1);
                     renderPicker();
                 });
 
                 const label = document.createElement('span');
-                label.className = 'mini-date-picker__label';
+                label.className = 'mini-date-picker__label text-gray-900 dark:text-white';
                 label.textContent = `${MONTH_NAMES[state.view.getMonth()]} ${state.view.getFullYear()}`;
 
                 const nextBtn = document.createElement('button');
                 nextBtn.type = 'button';
-                nextBtn.className = 'mini-date-picker__nav-btn';
-                nextBtn.innerHTML = '<i class="fa fa-chevron-right" aria-hidden="true"></i>';
+                nextBtn.className = 'mini-date-picker__nav-btn hover:bg-gray-100 dark:hover:bg-gray-800';
+                nextBtn.innerHTML = '<i class="fa fa-chevron-right text-gray-800 dark:text-gray-100" aria-hidden="true"></i>';
                 nextBtn.addEventListener('click', () => {
                     state.view = new Date(state.view.getFullYear(), state.view.getMonth() + 1, 1);
                     renderPicker();
@@ -2220,7 +2694,7 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                 header.appendChild(nextBtn);
 
                 const weekdayRow = document.createElement('div');
-                weekdayRow.className = 'mini-date-picker__weekdays';
+                weekdayRow.className = 'mini-date-picker__weekdays text-gray-500 dark:text-gray-400';
                 ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(day => {
                     const span = document.createElement('span');
                     span.textContent = day;
@@ -2241,15 +2715,17 @@ const DATA_SEEDED_FLAG = 'calendar_seeded';
                     const dateValue = formatDateForStorage(date);
                     const button = document.createElement('button');
                     button.type = 'button';
-                    button.className = 'mini-date-picker__day';
+                    button.className = 'mini-date-picker__day hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200';
                     if (state.dates.includes(dateValue)) {
-                        button.classList.add('is-selected');
+                        // Black/White theme for selection
+                        button.classList.remove('text-gray-700', 'dark:text-gray-200', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
+                        button.classList.add('bg-black', 'text-white', 'dark:bg-white', 'dark:text-black', 'font-bold');
                         button.setAttribute('aria-pressed', 'true');
                     } else {
                         button.setAttribute('aria-pressed', 'false');
                     }
                     if (dateValue === todayValue) {
-                        button.classList.add('is-today');
+                         button.classList.add('border', 'border-gray-500');
                     }
                     button.textContent = day;
                     button.title = `Toggle ${formatReadableDate(date)}`;

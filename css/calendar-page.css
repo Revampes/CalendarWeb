@@ -1,13 +1,13 @@
 .text-shadow {
-    text-shadow: 0 2px 4px rgba(15, 23, 42, 0.1);
+    text-shadow: 0 2px 4px rgba(24, 24, 27, 0.1);
 }
 
 .bg-gradient-light {
-    background: linear-gradient(135deg, #e0f2fe 0%, #eef2ff 100%);
+    background: linear-gradient(135deg, #f4f4f5 0%, #e5e7eb 100%);
 }
 
 .bg-gradient-dark {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
 }
 
 .scrollbar-thin {
@@ -36,7 +36,7 @@
 
 .calendar-day-cell {
     position: relative;
-    min-height: 96px;
+    aspect-ratio: 1; /* Make it square */
     border-radius: 0.75rem;
     border: 1px solid rgba(148, 163, 184, 0.3);
     background: rgba(255, 255, 255, 0.85);
@@ -45,17 +45,17 @@
 
 .calendar-day-cell:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 12px 24px rgba(24, 24, 27, 0.08);
 }
 
 .dark .calendar-day-cell {
-    background: rgba(15, 23, 42, 0.65);
-    border-color: rgba(71, 85, 105, 0.55);
+    background: rgba(24, 24, 27, 0.65);
+    border-color: rgba(82, 82, 91, 0.55);
 }
 
 .calendar-day-number {
     font-weight: 600;
-    color: rgba(15, 23, 42, 0.82);
+    color: rgba(24, 24, 27, 0.82);
 }
 
 .dark .calendar-day-number {
@@ -84,19 +84,19 @@
     position: relative;
     padding: 1rem;
     border-radius: 0.9rem;
-    border: 1px solid rgba(var(--task-color, 99, 102, 241), 0.35);
-    background: linear-gradient(135deg, rgba(var(--task-color, 99, 102, 241), 0.18), rgba(var(--task-color, 99, 102, 241), 0.08));
+    border: 1px solid rgba(var(--task-color, 82, 82, 91), 0.35);
+    background: linear-gradient(135deg, rgba(var(--task-color, 82, 82, 91), 0.18), rgba(var(--task-color, 82, 82, 91), 0.08));
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .task-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 16px 32px rgba(var(--task-color, 99, 102, 241), 0.22);
+    box-shadow: 0 16px 32px rgba(var(--task-color, 82, 82, 91), 0.22);
 }
 
 .dark .task-card {
-    background: linear-gradient(135deg, rgba(var(--task-color, 99, 102, 241), 0.28), rgba(var(--task-color, 99, 102, 241), 0.12));
-    border-color: rgba(var(--task-color, 99, 102, 241), 0.5);
+    background: linear-gradient(135deg, rgba(var(--task-color, 82, 82, 91), 0.28), rgba(var(--task-color, 82, 82, 91), 0.12));
+    border-color: rgba(var(--task-color, 82, 82, 91), 0.5);
 }
 
 .todo-item {
@@ -113,7 +113,7 @@
 
 .todo-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 12px 24px rgba(24, 24, 27, 0.08);
 }
 
 .dark .todo-item {
@@ -139,7 +139,7 @@
 .daily-reminder-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(24, 24, 27, 0.55);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -153,11 +153,11 @@
     border-radius: 1rem;
     padding: 1.5rem;
     background: var(--card-bg, #ffffff);
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+    box-shadow: 0 20px 50px rgba(24, 24, 27, 0.25);
 }
 
 .dark .daily-reminder-card {
-    --card-bg: #0f172a;
+    --card-bg: #18181b;
 }
 
 .daily-reminder-card h3 {

@@ -5,7 +5,7 @@
 const CalendarState = {
     currentDate: new Date(),
     selectedDate: new Date(),
-    currentView: 'month'
+    currentView: 'week' // Default view changed to 'week' 
 };
 
 // Initialize calendar page

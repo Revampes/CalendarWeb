@@ -235,13 +235,22 @@ function sendNotification(item, isEarly) {
 
 function dispatchNotification(title, options) {
     console.log("[Debug] Dispatching notification:", title);
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification(title, options);
-             new Notification(title, options);
-        });
-    } else {
-        new Notification(title, options);
+    
+    // In Electron or direct usage, prefer standard Notification API instantly
+    // to avoid Service Worker readiness delays or failures.
+    try {
+        const n = new Notification(title, options);
+        n.onclick = function() {
+            window.focus();
+            this.close();
+        };
+    } catch (e) {
+        console.error("Standard Notification failed, trying SW:", e);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification(title, options);
+            });
+        }
     }
 }
 
@@ -508,5 +517,7 @@ window.CalendarApp = {
     isToday,
     isSameDate,
     getTaskColor,
-    closeAllModals
+    closeAllModals,
+    sendDailyBriefing, // Expose for testing
+    checkReminders     // Expose for debugging if needed
 };

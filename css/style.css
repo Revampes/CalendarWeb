@@ -3,39 +3,39 @@
 /* CSS Variables for Theming */
 :root {
     /* Light Mode Colors */
-    --bg-primary: #f9fafb;
+    --bg-primary: #fafafa;     /* Zinc 50 */
     --bg-secondary: #ffffff;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --text-muted: #9ca3af;
-    --border-color: #e5e7eb;
-    --accent-primary: #6366f1;
-    --accent-hover: #4f46e5;
+    --text-primary: #18181b;   /* Zinc 900 */
+    --text-secondary: #52525b; /* Zinc 600 */
+    --text-muted: #a1a1aa;     /* Zinc 400 */
+    --border-color: #e4e4e7;   /* Zinc 200 */
+    --accent-primary: #52525b;
+    --accent-hover: #3f3f46;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     
     /* Task Type Colors */
-    --task-lecture: #3b82f6;
-    --task-tutorial: #10b981;
-    --task-training: #f59e0b;
-    --task-meeting: #8b5cf6;
-    --task-assignment: #ef4444;
-    --task-exam: #ec4899;
-    --task-break: #6366f1;
-    --task-other: #6b7280;
+    --task-lecture: #3f3f46;
+    --task-tutorial: #52525b;
+    --task-training: #71717a;
+    --task-meeting: #a1a1aa;
+    --task-assignment: #d4d4d8;
+    --task-exam: #27272a;
+    --task-break: #e4e4e7;
+    --task-other: #f4f4f5;
 }
 
 /* Dark Mode Colors */
 body.dark {
-    --bg-primary: #111827;
-    --bg-secondary: #1f2937;
-    --text-primary: #f9fafb;
-    --text-secondary: #d1d5db;
-    --text-muted: #9ca3af;
-    --border-color: #374151;
-    --accent-primary: #818cf8;
-    --accent-hover: #6366f1;
+    --bg-primary: #18181b;     /* Zinc 900 */
+    --bg-secondary: #27272a;   /* Zinc 800 */
+    --text-primary: #fafafa;   /* Zinc 50 */
+    --text-secondary: #d4d4d8; /* Zinc 300 */
+    --text-muted: #a1a1aa;     /* Zinc 400 */
+    --border-color: #3f3f46;   /* Zinc 700 */
+    --accent-primary: #a1a1aa;
+    --accent-hover: #71717a;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
@@ -232,11 +232,11 @@ html, body {
 
 .calendar-day.today {
     border: 2px solid var(--accent-primary);
-    background-color: rgba(99, 102, 241, 0.1);
+    background-color: rgba(82, 82, 91, 0.1);
 }
 
 .calendar-day.selected {
-    background-color: rgba(99, 102, 241, 0.2);
+    background-color: rgba(82, 82, 91, 0.2);
 }
 
 .calendar-day-number {

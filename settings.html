@@ -110,6 +110,13 @@
                             <p class="mt-1 text-xs text-gray-500">The app will attempt to notify you at this time.</p>
                         </div>
                     </div>
+                    
+                    <!-- Test Button -->
+                     <div class="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800">
+                        <button id="test-briefing-btn" class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors focus:outline-none">
+                            <i class="fa fa-paper-plane-o mr-1"></i> Send Test Briefing Now
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -132,6 +139,7 @@
             const timeContainer = document.getElementById('daily-time-container');
             const timeInput = document.getElementById('daily-notification-time');
             const saveBtn = document.getElementById('save-settings-btn');
+            const testBtn = document.getElementById('test-briefing-btn');
             
             // Load Settings
             const settings = JSON.parse(localStorage.getItem('calendar_settings') || '{}');
@@ -161,6 +169,37 @@
                     timeContainer.style.opacity = '0';
                 }
             });
+
+            // Test Button Handler
+            if (testBtn) {
+                testBtn.addEventListener('click', () => {
+                    // Check permission
+                    if (Notification.permission !== 'granted') {
+                        Notification.requestPermission().then(p => {
+                            if (p === 'granted') triggerTest();
+                            else alert('Please enable notifications first.');
+                        });
+                    } else {
+                        triggerTest();
+                    }
+                });
+            }
+
+            function triggerTest() {
+                if (window.CalendarApp && window.CalendarApp.sendDailyBriefing) {
+                    const today = window.CalendarApp.formatDateForStorage(new Date());
+                    window.CalendarApp.sendDailyBriefing(today);
+                    // Visual feedback
+                    const originalText = testBtn.innerHTML;
+                    testBtn.innerHTML = '<i class="fa fa-check mr-1"></i> Sent!';
+                    setTimeout(() => {
+                        testBtn.innerHTML = originalText;
+                    }, 2000);
+                } else {
+                    console.error('CalendarApp.sendDailyBriefing is not available');
+                    alert('Error: App core not loaded.');
+                }
+            }
 
             // Save Handler
             saveBtn.addEventListener('click', () => {
